@@ -4,7 +4,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'automjete',
     name: 'Automjete',
-    icon: 'car',
+    icon: 'truck',
     color: '#E74C3C',
     subcategories: ['Makina', 'Motorë', 'Kamionë', 'Pjesë këmbimi', 'Biçikleta'],
   },
@@ -18,7 +18,7 @@ export const CATEGORIES: Category[] = [
   {
     id: 'elektronike',
     name: 'Elektronikë',
-    icon: 'laptop',
+    icon: 'monitor',
     color: '#9B59B6',
     subcategories: ['Telefona', 'Laptopë', 'Tableta', 'TV', 'Konsola', 'Aksesorë'],
   },
