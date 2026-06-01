@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
+import { notify, confirmAction } from '../../utils/notify';
 import ListingCard from '../../components/ListingCard';
 
 export default function ProfileScreen() {
@@ -15,11 +16,15 @@ export default function ProfileScreen() {
   const favoriteListings = listings.filter(l => favorites.includes(l.id));
 
   const menuItems = [
-    { icon: 'settings', label: 'Cilësimet', onPress: () => {} },
-    { icon: 'shield', label: 'Privatësia & Siguria', onPress: () => {} },
-    { icon: 'help-circle', label: 'Ndihmë', onPress: () => {} },
-    { icon: 'info', label: 'Rreth Shitje', onPress: () => {} },
+    { icon: 'settings', label: 'Cilësimet', onPress: () => notify('Cilësimet', 'Së shpejti.') },
+    { icon: 'shield', label: 'Privatësia & Siguria', onPress: () => notify('Privatësia & Siguria', 'Së shpejti.') },
+    { icon: 'help-circle', label: 'Ndihmë', onPress: () => notify('Ndihmë', 'Na kontakto në support@shitje.al') },
+    { icon: 'info', label: 'Rreth Shitje', onPress: () => notify('Rreth Shitje', 'Shitje v1.0.0\nTregu i Shqipërisë.') },
   ];
+
+  const handleLogout = () => {
+    confirmAction('Dil nga llogaria', 'A je i sigurt që do të dalësh?', () => {}, 'Dil');
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -106,7 +111,7 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <Pressable style={styles.logoutButton}>
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
           <Feather name="log-out" size={18} color={Colors.accent} />
           <Text style={styles.logoutText}>Dil nga llogaria</Text>
         </Pressable>

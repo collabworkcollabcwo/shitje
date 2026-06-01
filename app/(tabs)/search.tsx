@@ -7,6 +7,7 @@ import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/c
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
 import SearchBar from '../../components/SearchBar';
+import HScroll from '../../components/HScroll';
 
 export default function SearchScreen() {
   const { searchQuery, setSearchQuery, filters, setFilters, getFilteredListings } = useApp();
@@ -50,7 +51,7 @@ export default function SearchScreen() {
       />
 
       <View style={styles.sortRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortScroll}>
+        <HScroll contentContainerStyle={styles.sortScroll}>
           {sortOptions.map(opt => (
             <Pressable
               key={opt.value}
@@ -62,7 +63,7 @@ export default function SearchScreen() {
               </Text>
             </Pressable>
           ))}
-        </ScrollView>
+        </HScroll>
       </View>
 
       <Text style={styles.resultCount}>{results.length} shpallje</Text>

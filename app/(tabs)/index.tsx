@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,8 @@ import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
 import CategoryCard from '../../components/CategoryCard';
 import SearchBar from '../../components/SearchBar';
+import HScroll from '../../components/HScroll';
+import { notify } from '../../utils/notify';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -26,7 +28,10 @@ export default function HomeScreen() {
           <Text style={styles.logo}>Shitje</Text>
           <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
         </View>
-        <Pressable style={styles.notifButton}>
+        <Pressable
+          style={styles.notifButton}
+          onPress={() => notify('Njoftime', 'S’ke njoftime të reja për momentin.')}
+        >
           <Feather name="bell" size={22} color={Colors.secondary} />
           <View style={styles.notifDot} />
         </Pressable>
@@ -44,11 +49,11 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Kategoritë</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesRow}>
+          <HScroll contentContainerStyle={styles.categoriesRow}>
             {CATEGORIES.map(cat => (
               <CategoryCard key={cat.id} category={cat} />
             ))}
-          </ScrollView>
+          </HScroll>
         </View>
 
         {featuredListings.length > 0 && (
@@ -57,18 +62,13 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>Te veçanta</Text>
               <Feather name="star" size={16} color={Colors.primary} />
             </View>
-            <FlatList
-              horizontal
-              data={featuredListings}
-              keyExtractor={item => item.id}
-              renderItem={({ item }) => (
-                <View style={{ marginRight: 12 }}>
+            <HScroll contentContainerStyle={{ paddingHorizontal: 12 }}>
+              {featuredListings.map(item => (
+                <View key={item.id} style={{ marginRight: 12 }}>
                   <ListingCard listing={item} />
                 </View>
-              )}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 12 }}
-            />
+              ))}
+            </HScroll>
           </View>
         )}
 

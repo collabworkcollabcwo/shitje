@@ -1,13 +1,11 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, Pressable, Dimensions, Linking, Share } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, Pressable, Linking, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { useApp } from '../../context/AppContext';
 import { formatPrice, formatDate } from '../../utils/format';
 import { CONDITION_LABELS, CATEGORIES } from '../../constants/categories';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -158,8 +156,8 @@ const styles = StyleSheet.create({
   notFoundText: { fontSize: 16, color: Colors.gray[500] },
   imageContainer: { position: 'relative' },
   mainImage: {
-    width: SCREEN_WIDTH,
-    height: SCREEN_WIDTH * 0.75,
+    width: '100%',
+    aspectRatio: 4 / 3,
     resizeMode: 'cover',
   },
   imageOverlay: {

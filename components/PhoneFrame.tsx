@@ -1,11 +1,10 @@
 import React from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Colors } from '../constants/colors';
+import { PHONE_FRAME_WIDTH, PHONE_FRAME_PADDING, PHONE_BREAKPOINT } from '../constants/layout';
 
-const PHONE_WIDTH = 414;
+const PHONE_WIDTH = PHONE_FRAME_WIDTH;
 const PHONE_HEIGHT = 896;
-// Below this viewport width we assume a real phone and go full-screen.
-const PHONE_BREAKPOINT = 600;
 
 /**
  * Wraps the app so that on a wide web browser it appears inside a centered
@@ -44,7 +43,7 @@ const styles = StyleSheet.create({
   device: {
     backgroundColor: '#0A0A0C',
     borderRadius: 46,
-    padding: 12,
+    padding: PHONE_FRAME_PADDING,
     // Soft floating shadow (works on web).
     boxShadow: '0 30px 70px rgba(0,0,0,0.45)',
   } as any,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -7,6 +7,8 @@ import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
+import HScroll from '../../components/HScroll';
+import { notify } from '../../utils/notify';
 
 export default function SellScreen() {
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function SellScreen() {
 
   const handleSubmit = () => {
     if (!title || !price || !category || !condition || !location) {
-      Alert.alert('Gabim', 'Ju lutem plotësoni të gjitha fushat e detyrueshme.');
+      notify('Gabim', 'Ju lutem plotësoni të gjitha fushat e detyrueshme.');
       return;
     }
 
@@ -53,18 +55,16 @@ export default function SellScreen() {
       location,
     });
 
-    Alert.alert('Sukses!', 'Shpallja juaj u publikua me sukses.', [
-      { text: 'OK', onPress: () => {
-        setTitle('');
-        setDescription('');
-        setPrice('');
-        setCategory('');
-        setCondition('');
-        setLocation('');
-        setImages([]);
-        router.push('/(tabs)');
-      }},
-    ]);
+    notify('Sukses!', 'Shpallja juaj u publikua me sukses.', () => {
+      setTitle('');
+      setDescription('');
+      setPrice('');
+      setCategory('');
+      setCondition('');
+      setLocation('');
+      setImages([]);
+      router.push('/(tabs)');
+    });
   };
 
   return (
@@ -75,7 +75,7 @@ export default function SellScreen() {
 
       <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
         <Text style={styles.label}>Fotot</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageRow}>
+        <HScroll style={styles.imageRow}>
           <Pressable style={styles.addImageButton} onPress={pickImage}>
             <Feather name="camera" size={28} color={Colors.primary} />
             <Text style={styles.addImageText}>Shto foto</Text>
@@ -89,7 +89,7 @@ export default function SellScreen() {
               </Pressable>
             </View>
           ))}
-        </ScrollView>
+        </HScroll>
 
         <Text style={styles.label}>Titulli *</Text>
         <TextInput

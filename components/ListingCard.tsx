@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Listing } from '../types';
 import { Colors } from '../constants/colors';
 import { formatPrice, formatDate } from '../utils/format';
 import { useApp } from '../context/AppContext';
-
-const CARD_WIDTH = (Dimensions.get('window').width - 36) / 2;
+import { useAppWidth } from '../constants/layout';
 
 interface Props {
   listing: Listing;
@@ -18,7 +17,8 @@ export default function ListingCard({ listing, fullWidth }: Props) {
   const router = useRouter();
   const { favorites, toggleFavorite } = useApp();
   const isFavorite = favorites.includes(listing.id);
-  const width = fullWidth ? Dimensions.get('window').width - 24 : CARD_WIDTH;
+  const appWidth = useAppWidth();
+  const width = fullWidth ? appWidth - 24 : (appWidth - 36) / 2;
 
   return (
     <Pressable
