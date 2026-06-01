@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
-import { useColors } from '../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { CATEGORIES } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
@@ -16,7 +16,7 @@ import { notify } from '../../utils/notify';
 export default function HomeScreen() {
   const router = useRouter();
   const { listings, searchQuery, setSearchQuery } = useApp();
-  const Colors = useColors();
+  const { colors: Colors, isDark, toggleTheme } = useTheme();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const featuredListings = listings.filter(l => l.isFeatured);
@@ -31,13 +31,18 @@ export default function HomeScreen() {
           <Text style={styles.logo}>Shitje</Text>
           <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
         </View>
-        <Pressable
-          style={styles.notifButton}
-          onPress={() => notify('Njoftime', 'S’ke njoftime të reja për momentin.')}
-        >
-          <Feather name="bell" size={22} color={Colors.secondary} />
-          <View style={styles.notifDot} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable style={styles.iconButton} onPress={toggleTheme} hitSlop={8}>
+            <Feather name={isDark ? 'sun' : 'moon'} size={22} color={Colors.secondary} />
+          </Pressable>
+          <Pressable
+            style={styles.notifButton}
+            onPress={() => notify('Njoftime', 'S’ke njoftime të reja për momentin.')}
+          >
+            <Feather name="bell" size={22} color={Colors.secondary} />
+            <View style={styles.notifDot} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -119,6 +124,13 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     fontSize: 12,
     color: Colors.gray[500],
     marginTop: -2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: 8,
   },
   notifButton: {
     position: 'relative',
