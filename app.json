@@ -18,7 +18,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.shitje.app"
+      "package": "com.shitje.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
