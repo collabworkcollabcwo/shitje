@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TextInput, StyleSheet, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../constants/colors';
+import { Palette } from '../constants/colors';
+import { useColors } from '../context/ThemeContext';
 
 interface Props {
   value: string;
@@ -12,6 +13,9 @@ interface Props {
 }
 
 export default function SearchBar({ value, onChangeText, placeholder, onFilterPress, autoFocus }: Props) {
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -40,7 +44,7 @@ export default function SearchBar({ value, onChangeText, placeholder, onFilterPr
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -52,7 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,

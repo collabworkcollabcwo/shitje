@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { CATEGORIES } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
@@ -15,6 +16,8 @@ import { notify } from '../../utils/notify';
 export default function HomeScreen() {
   const router = useRouter();
   const { listings, searchQuery, setSearchQuery } = useApp();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const featuredListings = listings.filter(l => l.isFeatured);
   const recentListings = listings
@@ -92,7 +95,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 4,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
   },
   logo: {
     fontSize: 28,

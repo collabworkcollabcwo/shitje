@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
 import { notify, confirmAction } from '../../utils/notify';
@@ -14,6 +15,8 @@ export default function ProfileScreen() {
   const { currentUser, listings, favorites } = useApp();
   const myListings = listings.filter(l => l.sellerId === currentUser.id);
   const favoriteListings = listings.filter(l => favorites.includes(l.id));
+  const { colors: Colors, isDark, toggleTheme } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const menuItems = [
     { icon: 'settings', label: 'Cilësimet', onPress: () => notify('Cilësimet', 'Së shpejti.') },
@@ -102,6 +105,17 @@ export default function ProfileScreen() {
         )}
 
         <View style={styles.menu}>
+          <View style={styles.menuItem}>
+            <Feather name={isDark ? 'moon' : 'sun'} size={20} color={Colors.gray[600]} />
+            <Text style={styles.menuLabel}>Tema e errët</Text>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{ false: Colors.gray[300], true: Colors.primary }}
+              thumbColor={Colors.white}
+              ios_backgroundColor={Colors.gray[300]}
+            />
+          </View>
           {menuItems.map((item, index) => (
             <Pressable key={index} style={styles.menuItem} onPress={item.onPress}>
               <Feather name={item.icon as any} size={20} color={Colors.gray[600]} />
@@ -123,10 +137,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   profileHeader: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     paddingVertical: 24,
     paddingHorizontal: 16,
@@ -204,7 +218,7 @@ const styles = StyleSheet.create({
   emptySection: {
     alignItems: 'center',
     paddingVertical: 24,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
   },
   emptyText: {
@@ -228,7 +242,7 @@ const styles = StyleSheet.create({
   },
   menu: {
     marginTop: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     marginHorizontal: 16,
     overflow: 'hidden',
@@ -255,7 +269,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
   },
   logoutText: {

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
 import ListingCard from '../../components/ListingCard';
@@ -10,6 +11,8 @@ import ListingCard from '../../components/ListingCard';
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getUserById, listings } = useApp();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const user = getUserById(id || '');
   const userListings = listings.filter(l => l.sellerId === id);
@@ -75,10 +78,10 @@ export default function UserProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.background },
   header: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     paddingVertical: 24,
     paddingHorizontal: 16,

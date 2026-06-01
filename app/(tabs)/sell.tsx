@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import HScroll from '../../components/HScroll';
@@ -20,6 +21,8 @@ export default function SellScreen() {
   const [condition, setCondition] = useState('');
   const [location, setLocation] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -184,13 +187,13 @@ export default function SellScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   header: {
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
   },
   title: { fontSize: 24, fontWeight: '700', color: Colors.secondary },
   form: { flex: 1, padding: 16 },
@@ -202,7 +205,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -283,7 +286,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.gray[200],
   },

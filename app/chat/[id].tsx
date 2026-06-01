@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { View, Text, FlatList, TextInput, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
 
@@ -12,6 +13,8 @@ export default function ChatScreen() {
   const { chats, messages, currentUser, sendMessage, getUserById } = useApp();
   const [text, setText] = useState('');
   const flatListRef = useRef<FlatList>(null);
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const chat = chats.find(c => c.id === id);
   const chatMessages = messages[id || ''] || [];
@@ -99,7 +102,7 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.gray[50] },
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   listingBar: {
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
     borderColor: Colors.gray[200],
@@ -163,7 +166,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     padding: 12,
     paddingBottom: 28,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
     borderTopColor: Colors.gray[200],
     gap: 8,

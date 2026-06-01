@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
@@ -14,6 +15,8 @@ export default function SearchScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const [tempFilters, setTempFilters] = useState(filters);
   const results = getFilteredListings();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const applyFilters = () => {
     setFilters(tempFilters);
@@ -174,9 +177,9 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  header: { paddingHorizontal: 16, paddingTop: 12, backgroundColor: Colors.white },
+  header: { paddingHorizontal: 16, paddingTop: 12, backgroundColor: Colors.surface },
   title: { fontSize: 24, fontWeight: '700', color: Colors.secondary },
   sortRow: { paddingVertical: 4 },
   sortScroll: { paddingHorizontal: 12, gap: 8 },
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.gray[200],
   },
@@ -209,7 +212,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontSize: 18, fontWeight: '600', color: Colors.gray[600] },
   emptyText: { fontSize: 14, color: Colors.gray[400] },
-  modalSafe: { flex: 1, backgroundColor: Colors.white },
+  modalSafe: { flex: 1, backgroundColor: Colors.surface },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate, truncate } from '../../utils/format';
 
 export default function MessagesScreen() {
   const router = useRouter();
   const { chats, currentUser, getUserById } = useApp();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const getOtherUser = (chat: typeof chats[0]) => {
     const otherId = chat.participants.find(id => id !== currentUser.id);
@@ -72,20 +75,20 @@ export default function MessagesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   header: {
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
   },
   title: { fontSize: 24, fontWeight: '700', color: Colors.secondary },
   list: { paddingTop: 8 },
   chatCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,

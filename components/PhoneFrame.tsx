@@ -1,6 +1,6 @@
 import React from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Colors } from '../constants/colors';
+import { useColors } from '../context/ThemeContext';
 import { PHONE_FRAME_WIDTH, PHONE_FRAME_PADDING, PHONE_BREAKPOINT } from '../constants/layout';
 
 const PHONE_WIDTH = PHONE_FRAME_WIDTH;
@@ -13,6 +13,7 @@ const PHONE_HEIGHT = 896;
  */
 export default function PhoneFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
+  const colors = useColors();
 
   // Native (APK / iOS) or a narrow browser (real phone): no frame.
   if (Platform.OS !== 'web' || width < PHONE_BREAKPOINT) {
@@ -25,7 +26,7 @@ export default function PhoneFrame({ children }: { children: React.ReactNode }) 
   return (
     <View style={styles.backdrop}>
       <View style={[styles.device, { width: PHONE_WIDTH, height: deviceHeight }]}>
-        <View style={styles.screen}>{children}</View>
+        <View style={[styles.screen, { backgroundColor: colors.background }]}>{children}</View>
       </View>
     </View>
   );
@@ -51,6 +52,5 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 34,
     overflow: 'hidden',
-    backgroundColor: Colors.background,
   },
 });

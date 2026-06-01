@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Listing } from '../types';
-import { Colors } from '../constants/colors';
+import { Palette } from '../constants/colors';
+import { useColors } from '../context/ThemeContext';
 import { formatPrice, formatDate } from '../utils/format';
 import { useApp } from '../context/AppContext';
 import { useAppWidth } from '../constants/layout';
@@ -19,6 +20,8 @@ export default function ListingCard({ listing, fullWidth }: Props) {
   const isFavorite = favorites.includes(listing.id);
   const appWidth = useAppWidth();
   const width = fullWidth ? appWidth - 24 : (appWidth - 36) / 2;
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   return (
     <Pressable
@@ -45,7 +48,7 @@ export default function ListingCard({ listing, fullWidth }: Props) {
           }}
         >
           <Feather
-            name={isFavorite ? 'heart' : 'heart'}
+            name="heart"
             size={18}
             color={isFavorite ? Colors.accent : Colors.white}
           />
@@ -64,9 +67,9 @@ export default function ListingCard({ listing, fullWidth }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   card: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,
@@ -82,6 +85,7 @@ const styles = StyleSheet.create({
   image: {
     height: 150,
     resizeMode: 'cover',
+    backgroundColor: Colors.gray[200],
   },
   urgentBadge: {
     position: 'absolute',

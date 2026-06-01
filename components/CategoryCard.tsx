@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Category } from '../types';
-import { Colors } from '../constants/colors';
+import { Palette } from '../constants/colors';
+import { useColors } from '../context/ThemeContext';
 
 interface Props {
   category: Category;
@@ -11,13 +12,15 @@ interface Props {
 
 export default function CategoryCard({ category }: Props) {
   const router = useRouter();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   return (
     <Pressable
       style={styles.card}
       onPress={() => router.push(`/category/${category.id}`)}
     >
-      <View style={[styles.iconContainer, { backgroundColor: category.color + '15' }]}>
+      <View style={[styles.iconContainer, { backgroundColor: category.color + '22' }]}>
         <Feather name={category.icon as any} size={22} color={category.color} />
       </View>
       <Text style={styles.name} numberOfLines={1}>{category.name}</Text>
@@ -25,7 +28,7 @@ export default function CategoryCard({ category }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   card: {
     alignItems: 'center',
     width: 78,

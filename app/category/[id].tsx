@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { CATEGORIES } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
@@ -10,6 +11,8 @@ import ListingCard from '../../components/ListingCard';
 export default function CategoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getListingsByCategory } = useApp();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const category = CATEGORIES.find(c => c.id === id);
   const listings = getListingsByCategory(id || '');
@@ -27,7 +30,7 @@ export default function CategoryScreen() {
       <Stack.Screen options={{ title: category.name }} />
       <View style={styles.container}>
         <View style={styles.header}>
-          <View style={[styles.iconBg, { backgroundColor: category.color + '15' }]}>
+          <View style={[styles.iconBg, { backgroundColor: category.color + '22' }]}>
             <Feather name={category.icon as any} size={28} color={category.color} />
           </View>
           <Text style={styles.title}>{category.name}</Text>
@@ -54,13 +57,13 @@ export default function CategoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     alignItems: 'center',
     paddingVertical: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.gray[200],
   },

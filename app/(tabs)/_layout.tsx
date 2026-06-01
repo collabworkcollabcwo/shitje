@@ -1,12 +1,16 @@
+import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   const { chats } = useApp();
   const unreadCount = chats.reduce((sum, c) => sum + c.unreadCount, 0);
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   return (
     <Tabs
@@ -14,7 +18,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.gray[400],
         tabBarStyle: {
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.surface,
           borderTopColor: Colors.gray[200],
           height: 60,
           paddingBottom: 8,
@@ -86,7 +90,7 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: Palette) => StyleSheet.create({
   sellButton: {
     backgroundColor: Colors.primary,
     width: 48,

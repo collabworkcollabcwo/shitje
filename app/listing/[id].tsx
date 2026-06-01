@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, Pressable, Linking, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Colors } from '../../constants/colors';
+import { Palette } from '../../constants/colors';
+import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatPrice, formatDate } from '../../utils/format';
 import { CONDITION_LABELS, CATEGORIES } from '../../constants/categories';
@@ -11,6 +12,8 @@ export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { listings, favorites, toggleFavorite, currentUser, getUserById } = useApp();
+  const Colors = useColors();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const listing = listings.find(l => l.id === id);
   if (!listing) {
@@ -150,8 +153,8 @@ export default function ListingDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.white },
+const createStyles = (Colors: Palette) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.surface },
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   notFoundText: { fontSize: 16, color: Colors.gray[500] },
   imageContainer: { position: 'relative' },
@@ -316,7 +319,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 16,
     paddingBottom: 32,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.surface,
     borderTopWidth: 1,
     borderTopColor: Colors.gray[200],
     shadowColor: '#000',
