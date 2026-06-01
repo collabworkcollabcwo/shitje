@@ -2,11 +2,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider } from '../context/AppContext';
 import { Colors } from '../constants/colors';
+import PhoneFrame from '../components/PhoneFrame';
 
 export default function RootLayout() {
   return (
     <AppProvider>
       <StatusBar style="dark" />
+      <PhoneFrame>
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: Colors.white },
@@ -38,6 +40,7 @@ export default function RootLayout() {
           options={{ title: '' }}
         />
       </Stack>
+      </PhoneFrame>
     </AppProvider>
   );
 }
