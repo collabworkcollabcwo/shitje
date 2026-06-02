@@ -7,12 +7,13 @@ import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
 import { useCurrency } from '../../context/CurrencyContext';
+import HeartButton from '../../components/HeartButton';
 import { CONDITION_LABELS, CATEGORIES } from '../../constants/categories';
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { listings, favorites, toggleFavorite, currentUser, getUserById } = useApp();
+  const { listings, currentUser, getUserById } = useApp();
   const Colors = useColors();
   const { format } = useCurrency();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
@@ -27,7 +28,6 @@ export default function ListingDetailScreen() {
   }
 
   const seller = getUserById(listing.sellerId);
-  const isFavorite = favorites.includes(listing.id);
   const isOwner = listing.sellerId === currentUser.id;
   const category = CATEGORIES.find(c => c.id === listing.category);
 
@@ -60,13 +60,7 @@ export default function ListingDetailScreen() {
           <View style={styles.priceRow}>
             <Text style={styles.price}>{format(listing.price)}</Text>
             <View style={styles.actions}>
-              <Pressable style={styles.actionButton} onPress={() => toggleFavorite(listing.id)}>
-                <Feather
-                  name="heart"
-                  size={20}
-                  color={isFavorite ? Colors.accent : Colors.gray[600]}
-                />
-              </Pressable>
+              <HeartButton listingId={listing.id} size={20} style={styles.actionButton} unselectedColor={Colors.gray[600]} />
               <Pressable style={styles.actionButton} onPress={handleShare}>
                 <Feather name="share-2" size={20} color={Colors.gray[600]} />
               </Pressable>

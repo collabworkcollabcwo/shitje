@@ -6,9 +6,9 @@ import { Listing } from '../types';
 import { Palette } from '../constants/colors';
 import { useColors } from '../context/ThemeContext';
 import { formatDate } from '../utils/format';
-import { useApp } from '../context/AppContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useAppWidth } from '../constants/layout';
+import HeartButton from './HeartButton';
 
 interface Props {
   listing: Listing;
@@ -17,9 +17,7 @@ interface Props {
 
 export default function ListingCard({ listing, fullWidth }: Props) {
   const router = useRouter();
-  const { favorites, toggleFavorite } = useApp();
   const { format } = useCurrency();
-  const isFavorite = favorites.includes(listing.id);
   const appWidth = useAppWidth();
   const width = fullWidth ? appWidth - 24 : (appWidth - 36) / 2;
   const Colors = useColors();
@@ -42,19 +40,7 @@ export default function ListingCard({ listing, fullWidth }: Props) {
             <Text style={styles.featuredText}>TOP</Text>
           </View>
         )}
-        <Pressable
-          style={styles.favoriteButton}
-          onPress={(e) => {
-            e.stopPropagation?.();
-            toggleFavorite(listing.id);
-          }}
-        >
-          <Feather
-            name="heart"
-            size={18}
-            color={isFavorite ? Colors.accent : Colors.white}
-          />
-        </Pressable>
+        <HeartButton listingId={listing.id} style={styles.favoriteButton} size={18} />
       </View>
       <View style={styles.info}>
         <Text style={styles.price}>{format(listing.price)}</Text>
