@@ -7,6 +7,7 @@ export const CATEGORIES: Category[] = [
     icon: 'truck',
     color: '#E74C3C',
     subcategories: ['Makina', 'Motorë', 'Kamionë', 'Pjesë këmbimi', 'Biçikleta'],
+    keywords: ['makina', 'makinë', 'makine', 'veturë', 'veture', 'automjet', 'auto', 'mjet', 'car', 'cars', 'motor', 'motorr', 'kamion', 'furgon', 'mercedes', 'audi', 'bmw', 'golf', 'toyota'],
   },
   {
     id: 'prona',
@@ -14,6 +15,7 @@ export const CATEGORIES: Category[] = [
     icon: 'home',
     color: '#3498DB',
     subcategories: ['Apartamente', 'Shtëpi', 'Tokë', 'Lokale', 'Garazhe'],
+    keywords: ['prona', 'pronë', 'shtëpi', 'shtepi', 'apartament', 'banesë', 'banese', 'tokë', 'toke', 'vilë', 'vile', 'garsoniere', 'lokal', 'garazh', 'property', 'house', 'apartment', 'flat'],
   },
   {
     id: 'elektronike',
@@ -21,6 +23,7 @@ export const CATEGORIES: Category[] = [
     icon: 'monitor',
     color: '#9B59B6',
     subcategories: ['Telefona', 'Laptopë', 'Tableta', 'TV', 'Konsola', 'Aksesorë'],
+    keywords: ['elektronikë', 'elektronike', 'telefon', 'telefona', 'celular', 'smartphone', 'phone', 'iphone', 'samsung', 'laptop', 'kompjuter', 'pc', 'tablet', 'tabletë', 'tv', 'televizor', 'konsolë', 'konsole', 'playstation', 'xbox', 'pajisje', 'aksesor'],
   },
   {
     id: 'veshje',
@@ -28,6 +31,7 @@ export const CATEGORIES: Category[] = [
     icon: 'shopping-bag',
     color: '#E91E63',
     subcategories: ['Për meshkuj', 'Për femra', 'Për fëmijë', 'Këpucë', 'Aksesorë'],
+    keywords: ['veshje', 'rroba', 'rrobë', 'këpucë', 'kepuce', 'këmishë', 'xhaketë', 'fustan', 'bluzë', 'pantallona', 'fashion', 'clothes', 'clothing', 'shoes', 'atlete'],
   },
   {
     id: 'shtepi',
@@ -35,6 +39,7 @@ export const CATEGORIES: Category[] = [
     icon: 'package',
     color: '#FF9800',
     subcategories: ['Mobilje', 'Pajisje kuzhine', 'Dekor', 'Kopsht', 'Vegla pune'],
+    keywords: ['shtëpi', 'shtepi', 'mobilje', 'divan', 'kolltuk', 'tavolinë', 'karrige', 'frigorifer', 'kuzhinë', 'kuzhine', 'dekor', 'kopsht', 'furniture', 'fridge', 'sofa', 'table'],
   },
   {
     id: 'pune',
@@ -42,6 +47,7 @@ export const CATEGORIES: Category[] = [
     icon: 'briefcase',
     color: '#2196F3',
     subcategories: ['Punë me kohë të plotë', 'Punë me kohë të pjesshme', 'Freelance', 'Praktikë'],
+    keywords: ['punë', 'pune', 'punësim', 'punesim', 'job', 'jobs', 'work', 'vend pune', 'staf', 'karrierë'],
   },
   {
     id: 'sherbime',
@@ -49,6 +55,7 @@ export const CATEGORIES: Category[] = [
     icon: 'tool',
     color: '#607D8B',
     subcategories: ['Riparime', 'Pastrim', 'Transport', 'Mësimdhënie', 'IT'],
+    keywords: ['shërbim', 'sherbim', 'sherbime', 'riparim', 'transport', 'pastrim', 'mësimdhënie', 'mesimdhenie', 'it', 'service', 'services'],
   },
   {
     id: 'kafshe',
@@ -56,6 +63,7 @@ export const CATEGORIES: Category[] = [
     icon: 'heart',
     color: '#4CAF50',
     subcategories: ['Qen', 'Mace', 'Zogj', 'Peshq', 'Aksesorë kafshësh'],
+    keywords: ['kafshë', 'kafshe', 'qen', 'mace', 'zog', 'peshk', 'pet', 'dog', 'cat', 'animal'],
   },
   {
     id: 'sport',
@@ -63,6 +71,7 @@ export const CATEGORIES: Category[] = [
     icon: 'activity',
     color: '#00BCD4',
     subcategories: ['Pajisje sportive', 'Biçikleta', 'Kamping', 'Instrumente muzikore', 'Libra'],
+    keywords: ['sport', 'biçikletë', 'biciklete', 'kamping', 'instrument', 'kitarë', 'kitare', 'guitar', 'top', 'fitness', 'palestër', 'libra', 'hobi'],
   },
   {
     id: 'femije',
@@ -70,6 +79,7 @@ export const CATEGORIES: Category[] = [
     icon: 'smile',
     color: '#FF5722',
     subcategories: ['Lodra', 'Veshje fëmijësh', 'Karroca', 'Mobilje fëmijësh'],
+    keywords: ['fëmijë', 'femije', 'lodra', 'lodër', 'karrocë', 'karroce', 'baby', 'bebe', 'kids', 'toys', 'toy'],
   },
   {
     id: 'biznes',
@@ -77,6 +87,7 @@ export const CATEGORIES: Category[] = [
     icon: 'trending-up',
     color: '#795548',
     subcategories: ['Pajisje biznesi', 'Material ndërtimi', 'Bujqësi', 'Ushqimore'],
+    keywords: ['biznes', 'industri', 'ndërtim', 'ndertim', 'bujqësi', 'bujqesi', 'ushqimore', 'business', 'material'],
   },
   {
     id: 'te_tjera',
@@ -84,6 +95,7 @@ export const CATEGORIES: Category[] = [
     icon: 'grid',
     color: '#9E9E9E',
     subcategories: ['Bileta', 'Koleksione', 'Falas', 'Këmbim'],
+    keywords: ['të tjera', 'te tjera', 'tjera', 'bileta', 'koleksion', 'falas', 'këmbim', 'kembim', 'other', 'various'],
   },
 ];
 

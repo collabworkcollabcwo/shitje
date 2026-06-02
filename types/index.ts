@@ -24,6 +24,8 @@ export interface Category {
   icon: string;
   subcategories: string[];
   color: string;
+  /** Extra Albanian/English terms that should match this category in search. */
+  keywords?: string[];
 }
 
 export interface User {

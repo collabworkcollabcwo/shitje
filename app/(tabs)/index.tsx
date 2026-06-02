@@ -17,7 +17,7 @@ import { notify } from '../../utils/notify';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { listings, searchQuery, setSearchQuery } = useApp();
+  const { listings, searchQuery, setSearchQuery, favorites } = useApp();
   const { colors: Colors, isDark, toggleTheme } = useTheme();
   const { currency, setCurrency } = useCurrency();
   const [showCurrency, setShowCurrency] = useState(false);
@@ -36,6 +36,14 @@ export default function HomeScreen() {
           <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
         </View>
         <View style={styles.headerActions}>
+          <Pressable style={styles.cartButton} onPress={() => router.push('/cart')} hitSlop={8}>
+            <Feather name="shopping-bag" size={22} color={Colors.secondary} />
+            {favorites.length > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{favorites.length}</Text>
+              </View>
+            )}
+          </Pressable>
           <Pressable style={styles.currencyChip} onPress={() => setShowCurrency(true)} hitSlop={8}>
             <Text style={styles.currencyChipText}>{currency}</Text>
           </Pressable>
@@ -160,6 +168,27 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   iconButton: {
     padding: 8,
+  },
+  cartButton: {
+    position: 'relative',
+    padding: 8,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    backgroundColor: Colors.accent,
+    borderRadius: 9,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
   },
   currencyChip: {
     paddingHorizontal: 10,

@@ -93,17 +93,6 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {favoriteListings.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Të preferuarat</Text>
-            <View style={styles.grid}>
-              {favoriteListings.map(l => (
-                <ListingCard key={l.id} listing={l} />
-              ))}
-            </View>
-          </View>
-        )}
-
         <View style={styles.menu}>
           {menuItems.map((item, index) => (
             <Pressable key={index} style={styles.menuItem} onPress={item.onPress}>

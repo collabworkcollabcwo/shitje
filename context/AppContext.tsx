@@ -2,6 +2,15 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { Listing, User, Chat, Message, SearchFilters } from '../types';
 import { MOCK_LISTINGS, MOCK_CHATS, MOCK_MESSAGES, CURRENT_USER, MOCK_USERS } from '../data/mock';
 import { generateId } from '../utils/format';
+import { CATEGORIES } from '../constants/categories';
+
+const CATEGORY_BY_ID: Record<string, (typeof CATEGORIES)[number]> = Object.fromEntries(
+  CATEGORIES.map(c => [c.id, c])
+);
+
+// Lowercase + strip Albanian diacritics (ë→e, ç→c) so "makinë" and "makine" match.
+const normalize = (s: string) =>
+  s.toLowerCase().replace(/ë/g, 'e').replace(/ç/g, 'c');
 
 interface AppContextType {
   listings: Listing[];
@@ -79,13 +88,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getFilteredListings = useCallback(() => {
     let result = [...listings];
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(l =>
-        l.title.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
-        l.location.toLowerCase().includes(q)
-      );
+    if (searchQuery.trim()) {
+      const q = normalize(searchQuery.trim());
+      result = result.filter(l => {
+        const cat = CATEGORY_BY_ID[l.category];
+        const haystack = normalize([
+          l.title,
+          l.description,
+          l.location,
+          l.subcategory || '',
+          cat ? cat.name : '',
+          cat && cat.keywords ? cat.keywords.join(' ') : '',
+        ].join(' '));
+        return haystack.includes(q);
+      });
     }
 
     if (filters.category) {

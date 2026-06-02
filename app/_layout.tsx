@@ -29,6 +29,7 @@ function RootNav() {
               headerTintColor: colors.white,
             }}
           />
+          <Stack.Screen name="cart" options={{ title: 'Shporta ime' }} />
           <Stack.Screen name="category/[id]" options={{ title: '' }} />
           <Stack.Screen name="chat/[id]" options={{ title: '' }} />
           <Stack.Screen name="user/[id]" options={{ title: '' }} />
