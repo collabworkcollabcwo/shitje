@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { CurrencyProvider } from '../context/CurrencyContext';
 import PhoneFrame from '../components/PhoneFrame';
 
 function RootNav() {
@@ -40,9 +41,11 @@ function RootNav() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <AppProvider>
-        <RootNav />
-      </AppProvider>
+      <CurrencyProvider>
+        <AppProvider>
+          <RootNav />
+        </AppProvider>
+      </CurrencyProvider>
     </ThemeProvider>
   );
 }

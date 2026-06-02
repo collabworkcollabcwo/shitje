@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Pressable, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { CURRENCIES } from '../../constants/currencies';
 import { CATEGORIES } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import ListingCard from '../../components/ListingCard';
@@ -17,6 +19,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { listings, searchQuery, setSearchQuery } = useApp();
   const { colors: Colors, isDark, toggleTheme } = useTheme();
+  const { currency, setCurrency } = useCurrency();
+  const [showCurrency, setShowCurrency] = useState(false);
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const featuredListings = listings.filter(l => l.isFeatured);
@@ -32,6 +36,9 @@ export default function HomeScreen() {
           <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
         </View>
         <View style={styles.headerActions}>
+          <Pressable style={styles.currencyChip} onPress={() => setShowCurrency(true)} hitSlop={8}>
+            <Text style={styles.currencyChipText}>{currency}</Text>
+          </Pressable>
           <Pressable style={styles.iconButton} onPress={toggleTheme} hitSlop={8}>
             <Feather name={isDark ? 'sun' : 'moon'} size={22} color={Colors.secondary} />
           </Pressable>
@@ -96,6 +103,28 @@ export default function HomeScreen() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      <Modal visible={showCurrency} transparent animationType="fade" onRequestClose={() => setShowCurrency(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCurrency(false)}>
+          <Pressable style={styles.currencySheet} onPress={(e) => e.stopPropagation && e.stopPropagation()}>
+            <Text style={styles.currencyTitle}>Zgjidh monedhën</Text>
+            {CURRENCIES.map(c => (
+              <Pressable
+                key={c.code}
+                style={[styles.currencyOption, currency === c.code && styles.currencyOptionActive]}
+                onPress={() => { setCurrency(c.code); setShowCurrency(false); }}
+              >
+                <Text style={styles.currencySymbol}>{c.symbol === 'Lekë' ? 'L' : c.symbol}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.currencyName}>{c.name}</Text>
+                  <Text style={styles.currencyCode}>{c.code}</Text>
+                </View>
+                {currency === c.code && <Feather name="check" size={18} color={Colors.primary} />}
+              </Pressable>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -131,6 +160,66 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   iconButton: {
     padding: 8,
+  },
+  currencyChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.gray[300],
+    marginRight: 2,
+  },
+  currencyChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.secondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  currencySheet: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 16,
+  },
+  currencyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.secondary,
+    marginBottom: 8,
+  },
+  currencyOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  currencyOptionActive: {
+    backgroundColor: Colors.primaryLight,
+  },
+  currencySymbol: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.secondary,
+    width: 28,
+    textAlign: 'center',
+  },
+  currencyName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.gray[800],
+  },
+  currencyCode: {
+    fontSize: 12,
+    color: Colors.gray[500],
   },
   notifButton: {
     position: 'relative',

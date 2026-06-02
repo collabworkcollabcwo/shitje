@@ -5,8 +5,9 @@ import { useRouter } from 'expo-router';
 import { Listing } from '../types';
 import { Palette } from '../constants/colors';
 import { useColors } from '../context/ThemeContext';
-import { formatPrice, formatDate } from '../utils/format';
+import { formatDate } from '../utils/format';
 import { useApp } from '../context/AppContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { useAppWidth } from '../constants/layout';
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
 export default function ListingCard({ listing, fullWidth }: Props) {
   const router = useRouter();
   const { favorites, toggleFavorite } = useApp();
+  const { format } = useCurrency();
   const isFavorite = favorites.includes(listing.id);
   const appWidth = useAppWidth();
   const width = fullWidth ? appWidth - 24 : (appWidth - 36) / 2;
@@ -55,7 +57,7 @@ export default function ListingCard({ listing, fullWidth }: Props) {
         </Pressable>
       </View>
       <View style={styles.info}>
-        <Text style={styles.price}>{formatPrice(listing.price)}</Text>
+        <Text style={styles.price}>{format(listing.price)}</Text>
         <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
         <View style={styles.meta}>
           <Feather name="map-pin" size={11} color={Colors.gray[500]} />

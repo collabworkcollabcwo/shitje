@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
 import HScroll from '../../components/HScroll';
@@ -21,6 +22,7 @@ export default function SellScreen() {
   const [condition, setCondition] = useState('');
   const [location, setLocation] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const { currency, toALL } = useCurrency();
   const Colors = useColors();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
@@ -50,7 +52,7 @@ export default function SellScreen() {
     addListing({
       title,
       description,
-      price: parseInt(price, 10),
+      price: toALL(parseInt(price, 10)),
       currency: 'ALL',
       images: images.length > 0 ? images : ['https://picsum.photos/seed/new/400/400'],
       category,
@@ -104,7 +106,7 @@ export default function SellScreen() {
           maxLength={100}
         />
 
-        <Text style={styles.label}>Çmimi (Lekë) *</Text>
+        <Text style={styles.label}>Çmimi ({currency}) *</Text>
         <View style={styles.priceInput}>
           <TextInput
             style={[styles.input, { flex: 1 }]}
@@ -114,7 +116,7 @@ export default function SellScreen() {
             placeholderTextColor={Colors.gray[400]}
             keyboardType="numeric"
           />
-          <Text style={styles.currency}>ALL</Text>
+          <Text style={styles.currency}>{currency}</Text>
         </View>
 
         <Text style={styles.label}>Kategoria *</Text>

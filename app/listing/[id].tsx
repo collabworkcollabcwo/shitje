@@ -5,7 +5,8 @@ import { Feather } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
-import { formatPrice, formatDate } from '../../utils/format';
+import { formatDate } from '../../utils/format';
+import { useCurrency } from '../../context/CurrencyContext';
 import { CONDITION_LABELS, CATEGORIES } from '../../constants/categories';
 
 export default function ListingDetailScreen() {
@@ -13,6 +14,7 @@ export default function ListingDetailScreen() {
   const router = useRouter();
   const { listings, favorites, toggleFavorite, currentUser, getUserById } = useApp();
   const Colors = useColors();
+  const { format } = useCurrency();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const listing = listings.find(l => l.id === id);
@@ -31,7 +33,7 @@ export default function ListingDetailScreen() {
 
   const handleShare = async () => {
     await Share.share({
-      message: `${listing.title} - ${formatPrice(listing.price)} në Shitje\nhttps://shitje.al/listing/${listing.id}`,
+      message: `${listing.title} - ${format(listing.price)} në Shitje\nhttps://shitje.al/listing/${listing.id}`,
     });
   };
 
@@ -56,7 +58,7 @@ export default function ListingDetailScreen() {
 
         <View style={styles.content}>
           <View style={styles.priceRow}>
-            <Text style={styles.price}>{formatPrice(listing.price)}</Text>
+            <Text style={styles.price}>{format(listing.price)}</Text>
             <View style={styles.actions}>
               <Pressable style={styles.actionButton} onPress={() => toggleFavorite(listing.id)}>
                 <Feather
