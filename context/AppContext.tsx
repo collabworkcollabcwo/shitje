@@ -89,7 +89,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let result = [...listings];
 
     if (searchQuery.trim()) {
-      const q = normalize(searchQuery.trim());
+      const qTokens = normalize(searchQuery.trim()).split(/\s+/).filter(Boolean);
       result = result.filter(l => {
         const cat = CATEGORY_BY_ID[l.category];
         const haystack = normalize([
@@ -100,7 +100,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           cat ? cat.name : '',
           cat && cat.keywords ? cat.keywords.join(' ') : '',
         ].join(' '));
-        return haystack.includes(q);
+        const hayTokens = haystack.split(/[^a-z0-9]+/).filter(Boolean);
+        // Every typed word must match — as a substring, or sharing a prefix with
+        // a word in the listing. This makes definite/plural/slang forms work too:
+        // "telefoni"→"telefon", "frigoriferi"→"frigorifer", "shtepia"→"shtepi".
+        return qTokens.every(qt =>
+          haystack.includes(qt) ||
+          hayTokens.some(ht => ht.length >= 4 && (qt.startsWith(ht) || ht.startsWith(qt)))
+        );
       });
     }
 

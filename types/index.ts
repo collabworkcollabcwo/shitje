@@ -42,6 +42,15 @@ export interface User {
   favorites: string[];
 }
 
+export interface Review {
+  id: string;
+  userId: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
 export interface Message {
   id: string;
   chatId: string;

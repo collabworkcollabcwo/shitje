@@ -1,4 +1,4 @@
-import { Listing, User, Chat, Message } from '../types';
+import { Listing, User, Chat, Message, Review } from '../types';
 
 export const CURRENT_USER: User = {
   id: 'user_1',
@@ -19,6 +19,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'user_2',
     name: 'Ardi Hoxha',
+    phone: '+355 69 234 5678',
     location: 'Durrës',
     joinedAt: '2023-06-20T10:00:00Z',
     rating: 4.5,
@@ -29,6 +30,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'user_3',
     name: 'Elira Basha',
+    phone: '+355 69 345 6789',
     location: 'Vlorë',
     joinedAt: '2024-03-10T10:00:00Z',
     rating: 4.9,
@@ -39,6 +41,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'user_4',
     name: 'Gentian Muça',
+    phone: '+355 69 456 7890',
     location: 'Shkodër',
     joinedAt: '2023-11-05T10:00:00Z',
     rating: 4.2,
@@ -49,6 +52,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'user_5',
     name: 'Drita Kelmendi',
+    phone: '+355 69 567 8901',
     location: 'Korçë',
     joinedAt: '2024-02-28T10:00:00Z',
     rating: 5.0,
@@ -56,6 +60,20 @@ export const MOCK_USERS: User[] = [
     listings: ['9', '10'],
     favorites: [],
   },
+];
+
+export const MOCK_REVIEWS: Review[] = [
+  { id: 'rev_1', userId: 'user_1', reviewerName: 'Ardi Hoxha', rating: 5, comment: 'Shitës shumë korrekt, produkti pikërisht si në përshkrim. E rekomandoj!', date: '2025-05-12T10:00:00Z' },
+  { id: 'rev_2', userId: 'user_1', reviewerName: 'Elira Basha', rating: 5, comment: 'Komunikim i shpejtë dhe takim pa probleme. Faleminderit!', date: '2025-04-20T10:00:00Z' },
+  { id: 'rev_3', userId: 'user_1', reviewerName: 'Gentian Muça', rating: 4, comment: 'Gjithçka në rregull, vetëm pak vonesë në takim.', date: '2025-03-28T10:00:00Z' },
+  { id: 'rev_4', userId: 'user_2', reviewerName: 'Flori', rating: 5, comment: 'Makina në gjendje të shkëlqyer, ashtu siç u dakorduam.', date: '2025-05-02T10:00:00Z' },
+  { id: 'rev_5', userId: 'user_2', reviewerName: 'Drita Kelmendi', rating: 4, comment: 'Person serioz dhe i besueshëm.', date: '2025-02-18T10:00:00Z' },
+  { id: 'rev_6', userId: 'user_3', reviewerName: 'Ardi Hoxha', rating: 5, comment: 'Shumë e sjellshme dhe profesionale. Çmim i drejtë.', date: '2025-05-19T10:00:00Z' },
+  { id: 'rev_7', userId: 'user_3', reviewerName: 'Flori', rating: 5, comment: 'Produkt cilësor, përgjigje e menjëhershme.', date: '2025-04-08T10:00:00Z' },
+  { id: 'rev_8', userId: 'user_4', reviewerName: 'Elira Basha', rating: 4, comment: 'Transaksion i mirë, gjithçka si u premtua.', date: '2025-03-15T10:00:00Z' },
+  { id: 'rev_9', userId: 'user_4', reviewerName: 'Drita Kelmendi', rating: 4, comment: 'Korrekt dhe i shpejtë në përgjigje.', date: '2025-01-22T10:00:00Z' },
+  { id: 'rev_10', userId: 'user_5', reviewerName: 'Gentian Muça', rating: 5, comment: 'Përvojë e shkëlqyer, do të blej përsëri!', date: '2025-05-26T10:00:00Z' },
+  { id: 'rev_11', userId: 'user_5', reviewerName: 'Flori', rating: 5, comment: 'E besueshme dhe shumë e shpejtë. E rekomandoj!', date: '2025-04-29T10:00:00Z' },
 ];
 
 export const MOCK_LISTINGS: Listing[] = [
