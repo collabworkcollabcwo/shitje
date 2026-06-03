@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Category } from '../types';
 import { Palette } from '../constants/colors';
@@ -17,11 +17,11 @@ export default function CategoryCard({ category }: Props) {
 
   return (
     <Pressable
-      style={styles.card}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       onPress={() => router.push(`/category/${category.id}`)}
     >
-      <View style={[styles.iconContainer, { backgroundColor: category.color + '22' }]}>
-        <Feather name={category.icon as any} size={22} color={category.color} />
+      <View style={[styles.iconContainer, { backgroundColor: category.color, shadowColor: category.color }]}>
+        <MaterialCommunityIcons name={category.icon as any} size={28} color="#FFFFFF" />
       </View>
       <Text style={styles.name} numberOfLines={1}>{category.name}</Text>
     </Pressable>
@@ -31,21 +31,30 @@ export default function CategoryCard({ category }: Props) {
 const createStyles = (Colors: Palette) => StyleSheet.create({
   card: {
     alignItems: 'center',
-    width: 78,
-    marginRight: 6,
+    width: 82,
+    marginRight: 8,
+  },
+  cardPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.96 }],
   },
   iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 62,
+    height: 62,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
+    // soft coloured glow (converted to box-shadow on web)
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   name: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: Colors.gray[700],
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

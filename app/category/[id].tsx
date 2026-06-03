@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { CATEGORIES } from '../../constants/categories';
@@ -30,8 +30,8 @@ export default function CategoryScreen() {
       <Stack.Screen options={{ title: category.name }} />
       <View style={styles.container}>
         <View style={styles.header}>
-          <View style={[styles.iconBg, { backgroundColor: category.color + '22' }]}>
-            <Feather name={category.icon as any} size={28} color={category.color} />
+          <View style={[styles.iconBg, { backgroundColor: category.color, shadowColor: category.color }]}>
+            <MaterialCommunityIcons name={category.icon as any} size={32} color="#FFFFFF" />
           </View>
           <Text style={styles.title}>{category.name}</Text>
           <Text style={styles.count}>{listings.length} shpallje</Text>
@@ -68,12 +68,16 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     borderBottomColor: Colors.gray[200],
   },
   iconBg: {
-    width: 60,
-    height: 60,
+    width: 64,
+    height: 64,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   title: {
     fontSize: 20,

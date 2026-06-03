@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
@@ -127,7 +127,7 @@ export default function SellScreen() {
               style={[styles.chip, category === cat.id && styles.chipActive]}
               onPress={() => setCategory(cat.id)}
             >
-              <Feather name={cat.icon as any} size={14} color={category === cat.id ? Colors.primary : Colors.gray[600]} />
+              <MaterialCommunityIcons name={cat.icon as any} size={16} color={category === cat.id ? Colors.primary : Colors.gray[600]} />
               <Text style={[styles.chipText, category === cat.id && styles.chipTextActive]}>
                 {cat.name}
               </Text>
