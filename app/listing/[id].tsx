@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, Pressable, Linking, Share } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Linking, Share } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
@@ -7,18 +7,32 @@ import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import { formatDate } from '../../utils/format';
 import { useCurrency } from '../../context/CurrencyContext';
+import { notify, confirmAction } from '../../utils/notify';
 import HeartButton from '../../components/HeartButton';
+import ImageCarousel from '../../components/ImageCarousel';
+import ListingCard from '../../components/ListingCard';
+import HScroll from '../../components/HScroll';
 import { CONDITION_LABELS, CATEGORIES } from '../../constants/categories';
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { listings, currentUser, getUserById } = useApp();
+  const {
+    listings, currentUser, getUserById, getSimilarListings,
+    getOrCreateChat, registerView, toggleSold, deleteListing,
+  } = useApp();
   const Colors = useColors();
   const { format } = useCurrency();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const listing = listings.find(l => l.id === id);
+
+  useEffect(() => {
+    if (listing && listing.sellerId !== currentUser.id) {
+      registerView(listing.id);
+    }
+  }, [listing?.id]);
+
   if (!listing) {
     return (
       <View style={styles.notFound}>
@@ -30,6 +44,7 @@ export default function ListingDetailScreen() {
   const seller = getUserById(listing.sellerId);
   const isOwner = listing.sellerId === currentUser.id;
   const category = CATEGORIES.find(c => c.id === listing.category);
+  const similar = getSimilarListings(listing, 6);
 
   const handleShare = async () => {
     await Share.share({
@@ -39,17 +54,53 @@ export default function ListingDetailScreen() {
 
   const handleCall = () => {
     if (seller?.phone) {
-      Linking.openURL(`tel:${seller.phone}`);
+      Linking.openURL(`tel:${seller.phone.replace(/\s/g, '')}`);
+    } else {
+      notify('Pa numër', 'Ky shitës nuk ka publikuar numër telefoni.');
     }
+  };
+
+  const handleMessage = () => {
+    const chatId = getOrCreateChat(listing);
+    router.push(`/chat/${chatId}`);
+  };
+
+  const handleToggleSold = () => {
+    if (listing.isSold) {
+      toggleSold(listing.id);
+      return;
+    }
+    confirmAction(
+      'Shëno si të shitur',
+      'Shpallja do të fshihet nga kërkimi dhe do të shfaqet si e shitur. Vazhdon?',
+      () => toggleSold(listing.id),
+      'Po, u shit'
+    );
+  };
+
+  const handleDelete = () => {
+    confirmAction(
+      'Fshi shpalljen',
+      'Ky veprim nuk kthehet mbrapsht. Je i sigurt?',
+      () => {
+        deleteListing(listing.id);
+        router.back();
+      },
+      'Fshi'
+    );
   };
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: listing.images[0] }} style={styles.mainImage} />
-          <View style={styles.imageOverlay} />
-          {listing.isUrgent && (
+          <ImageCarousel images={listing.images} />
+          {listing.isSold && (
+            <View style={styles.soldBadge}>
+              <Text style={styles.badgeText}>E SHITUR</Text>
+            </View>
+          )}
+          {!listing.isSold && listing.isUrgent && (
             <View style={styles.urgentBadge}>
               <Text style={styles.badgeText}>URGJENT</Text>
             </View>
@@ -86,8 +137,16 @@ export default function ListingDetailScreen() {
 
           <View style={styles.tagsRow}>
             {category && (
-              <View style={[styles.tag, { backgroundColor: category.color + '15' }]}>
+              <Pressable
+                style={[styles.tag, { backgroundColor: category.color + '15' }]}
+                onPress={() => router.push(`/category/${category.id}`)}
+              >
                 <Text style={[styles.tagText, { color: category.color }]}>{category.name}</Text>
+              </Pressable>
+            )}
+            {listing.subcategory && (
+              <View style={styles.tag}>
+                <Text style={styles.tagText}>{listing.subcategory}</Text>
               </View>
             )}
             <View style={styles.tag}>
@@ -108,7 +167,7 @@ export default function ListingDetailScreen() {
             onPress={() => router.push(`/user/${listing.sellerId}`)}
           >
             <View style={styles.sellerAvatar}>
-              <Feather name="user" size={24} color={Colors.white} />
+              <Text style={styles.sellerInitial}>{listing.sellerName.charAt(0).toUpperCase()}</Text>
             </View>
             <View style={styles.sellerInfo}>
               <Text style={styles.sellerName}>{listing.sellerName}</Text>
@@ -125,9 +184,48 @@ export default function ListingDetailScreen() {
             </View>
             <Feather name="chevron-right" size={20} color={Colors.gray[400]} />
           </Pressable>
+
+          {isOwner && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.sectionTitle}>Menaxho shpalljen</Text>
+              <View style={styles.ownerRow}>
+                <Pressable
+                  style={[styles.ownerButton, listing.isSold && styles.ownerButtonActive]}
+                  onPress={handleToggleSold}
+                >
+                  <Feather
+                    name={listing.isSold ? 'rotate-ccw' : 'check-circle'}
+                    size={17}
+                    color={listing.isSold ? Colors.white : Colors.success}
+                  />
+                  <Text style={[styles.ownerButtonText, { color: listing.isSold ? Colors.white : Colors.success }]}>
+                    {listing.isSold ? 'Rikthe në shitje' : 'Shëno si të shitur'}
+                  </Text>
+                </Pressable>
+                <Pressable style={styles.deleteButton} onPress={handleDelete}>
+                  <Feather name="trash-2" size={17} color={Colors.error} />
+                  <Text style={[styles.ownerButtonText, { color: Colors.error }]}>Fshi</Text>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
 
-        <View style={{ height: 100 }} />
+        {similar.length > 0 && (
+          <View style={styles.similarSection}>
+            <Text style={[styles.sectionTitle, { paddingHorizontal: 16 }]}>Shpallje të ngjashme</Text>
+            <HScroll contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 4 }}>
+              {similar.map(item => (
+                <View key={item.id} style={{ marginRight: 12 }}>
+                  <ListingCard listing={item} />
+                </View>
+              ))}
+            </HScroll>
+          </View>
+        )}
+
+        <View style={{ height: isOwner ? 24 : 100 }} />
       </ScrollView>
 
       {!isOwner && (
@@ -136,10 +234,7 @@ export default function ListingDetailScreen() {
             <Feather name="phone" size={20} color={Colors.primary} />
             <Text style={styles.callText}>Telefono</Text>
           </Pressable>
-          <Pressable
-            style={styles.messageButton}
-            onPress={() => router.push(`/chat/chat_1`)}
-          >
+          <Pressable style={styles.messageButton} onPress={handleMessage}>
             <Feather name="message-circle" size={20} color={Colors.white} />
             <Text style={styles.messageText}>Shkruaj mesazh</Text>
           </Pressable>
@@ -154,24 +249,20 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   notFound: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   notFoundText: { fontSize: 16, color: Colors.gray[500] },
   imageContainer: { position: 'relative' },
-  mainImage: {
-    width: '100%',
-    aspectRatio: 4 / 3,
-    resizeMode: 'cover',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100,
-    backgroundColor: 'transparent',
-  },
   urgentBadge: {
     position: 'absolute',
     top: 100,
     left: 16,
     backgroundColor: Colors.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  soldBadge: {
+    position: 'absolute',
+    top: 100,
+    left: 16,
+    backgroundColor: Colors.gray[800],
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 6,
@@ -228,6 +319,7 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   tagsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 4,
   },
@@ -274,6 +366,11 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sellerInitial: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: Colors.white,
+  },
   sellerInfo: {
     flex: 1,
   },
@@ -305,6 +402,45 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   sellerLocation: {
     fontSize: 13,
     color: Colors.gray[500],
+  },
+  ownerRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  ownerButton: {
+    flex: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.success,
+  },
+  ownerButtonActive: {
+    backgroundColor: Colors.success,
+  },
+  deleteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.error,
+  },
+  ownerButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  similarSection: {
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 8,
+    borderTopColor: Colors.gray[100],
   },
   bottomBar: {
     position: 'absolute',

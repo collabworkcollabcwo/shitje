@@ -23,10 +23,20 @@ export default function HomeScreen() {
   const [showCurrency, setShowCurrency] = useState(false);
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
-  const featuredListings = listings.filter(l => l.isFeatured);
-  const recentListings = listings
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+  const active = useMemo(() => listings.filter(l => !l.isSold), [listings]);
+  const featuredListings = useMemo(() => active.filter(l => l.isFeatured), [active]);
+  // NOTE: copy before sorting — .sort() mutates, and sorting state in place
+  // silently reordered the listings array for every other screen.
+  const recentListings = useMemo(
+    () => [...active]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10),
+    [active]
+  );
+  const popularListings = useMemo(
+    () => [...active].sort((a, b) => b.views - a.views).slice(0, 6),
+    [active]
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -87,6 +97,22 @@ export default function HomeScreen() {
             </View>
             <HScroll contentContainerStyle={{ paddingHorizontal: 12 }}>
               {featuredListings.map(item => (
+                <View key={item.id} style={{ marginRight: 12 }}>
+                  <ListingCard listing={item} />
+                </View>
+              ))}
+            </HScroll>
+          </View>
+        )}
+
+        {popularListings.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Më të kërkuarat</Text>
+              <Feather name="trending-up" size={16} color={Colors.primary} />
+            </View>
+            <HScroll contentContainerStyle={{ paddingHorizontal: 12 }}>
+              {popularListings.map(item => (
                 <View key={item.id} style={{ marginRight: 12 }}>
                   <ListingCard listing={item} />
                 </View>

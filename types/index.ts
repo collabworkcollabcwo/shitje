@@ -15,6 +15,7 @@ export interface Listing {
   createdAt: string;
   isFeatured?: boolean;
   isUrgent?: boolean;
+  isSold?: boolean;
   views: number;
 }
 

@@ -1,16 +1,46 @@
-import React, { useState, useRef, useMemo } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, Pressable, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
-import { formatDate } from '../../utils/format';
+import { formatTime } from '../../utils/format';
+
+/** Three softly pulsing dots shown while the other person is "typing". */
+function TypingDots({ color }: { color: string }) {
+  const anims = useRef([new Animated.Value(0.3), new Animated.Value(0.3), new Animated.Value(0.3)]).current;
+
+  useEffect(() => {
+    const loops = anims.map((a, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(i * 160),
+          Animated.timing(a, { toValue: 1, duration: 320, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(a, { toValue: 0.3, duration: 320, useNativeDriver: Platform.OS !== 'web' }),
+        ])
+      )
+    );
+    loops.forEach(l => l.start());
+    return () => loops.forEach(l => l.stop());
+  }, []);
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 4, paddingVertical: 4 }}>
+      {anims.map((a, i) => (
+        <Animated.View
+          key={i}
+          style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: color, opacity: a }}
+        />
+      ))}
+    </View>
+  );
+}
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { chats, messages, currentUser, sendMessage, getUserById } = useApp();
+  const { chats, messages, currentUser, sendMessage, markChatRead, typingChats, getUserById } = useApp();
   const [text, setText] = useState('');
   const flatListRef = useRef<FlatList>(null);
   const Colors = useColors();
@@ -20,11 +50,23 @@ export default function ChatScreen() {
   const chatMessages = messages[id || ''] || [];
   const otherId = chat?.participants.find(p => p !== currentUser.id);
   const otherUser = otherId ? getUserById(otherId) : undefined;
+  const isTyping = !!typingChats[id || ''];
+
+  // Opening the conversation clears its unread badge.
+  useEffect(() => {
+    if (id) markChatRead(id);
+  }, [id, chatMessages.length, markChatRead]);
+
+  // Keep the view pinned to the newest message (also when the reply arrives).
+  useEffect(() => {
+    const t = setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 80);
+    return () => clearTimeout(t);
+  }, [chatMessages.length, isTyping]);
 
   if (!chat) {
     return (
       <View style={styles.notFound}>
-        <Text>Biseda nuk u gjet</Text>
+        <Text style={{ color: Colors.gray[500] }}>Biseda nuk u gjet</Text>
       </View>
     );
   }
@@ -33,14 +75,13 @@ export default function ChatScreen() {
     if (!text.trim()) return;
     sendMessage(id!, text.trim());
     setText('');
-    setTimeout(() => flatListRef.current?.scrollToEnd(), 100);
   };
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: otherUser?.name || 'Bisedë',
+          title: isTyping ? `${otherUser?.name || 'Bisedë'} · po shkruan...` : (otherUser?.name || 'Bisedë'),
           headerBackTitle: 'Prapa',
         }}
       />
@@ -71,12 +112,36 @@ export default function ChatScreen() {
                 <Text style={[styles.messageText, isMe && styles.myMessageText]}>
                   {item.text}
                 </Text>
-                <Text style={[styles.messageTime, isMe && styles.myMessageTime]}>
-                  {formatDate(item.timestamp)}
-                </Text>
+                <View style={styles.timeRow}>
+                  <Text style={[styles.messageTime, isMe && styles.myMessageTime]}>
+                    {formatTime(item.timestamp)}
+                  </Text>
+                  {isMe && (
+                    <Feather
+                      name={item.read ? 'check-circle' : 'check'}
+                      size={11}
+                      color="rgba(255,255,255,0.7)"
+                    />
+                  )}
+                </View>
               </View>
             );
           }}
+          ListEmptyComponent={
+            <View style={styles.emptyChat}>
+              <Feather name="message-circle" size={40} color={Colors.gray[300]} />
+              <Text style={styles.emptyChatText}>
+                Fillo bisedën — pyet për çmimin, gjendjen ose takimin.
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            isTyping ? (
+              <View style={[styles.messageBubble, styles.otherMessage, styles.typingBubble]}>
+                <TypingDots color={Colors.gray[500]} />
+              </View>
+            ) : null
+          }
         />
 
         <View style={styles.inputBar}>
@@ -124,6 +189,7 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   messagesList: {
     padding: 16,
     paddingBottom: 8,
+    flexGrow: 1,
   },
   messageBubble: {
     maxWidth: '78%',
@@ -144,6 +210,9 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.gray[200],
   },
+  typingBubble: {
+    paddingVertical: 8,
+  },
   messageText: {
     fontSize: 15,
     color: Colors.gray[800],
@@ -152,14 +221,32 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   myMessageText: {
     color: Colors.white,
   },
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-end',
+    marginTop: 4,
+  },
   messageTime: {
     fontSize: 10,
     color: Colors.gray[400],
-    marginTop: 4,
-    alignSelf: 'flex-end',
   },
   myMessageTime: {
     color: 'rgba(255,255,255,0.7)',
+  },
+  emptyChat: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 40,
+  },
+  emptyChatText: {
+    fontSize: 14,
+    color: Colors.gray[400],
+    textAlign: 'center',
+    lineHeight: 20,
   },
   inputBar: {
     flexDirection: 'row',

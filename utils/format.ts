@@ -18,6 +18,25 @@ export function formatDate(dateString: string): string {
   return date.toLocaleDateString('sq-AL');
 }
 
+/** Time of day, e.g. "14:35" — for message bubbles inside a chat. */
+export function formatTime(dateString: string): string {
+  const date = new Date(dateString);
+  const hh = date.getHours().toString().padStart(2, '0');
+  const mm = date.getMinutes().toString().padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
+const MONTHS_SQ = [
+  'Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor',
+  'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor',
+];
+
+/** "Mars 2024" — for "member since" style labels. */
+export function formatMonthYear(dateString: string): string {
+  const date = new Date(dateString);
+  return `${MONTHS_SQ[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 3) + '...';

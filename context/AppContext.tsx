@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Listing, User, Chat, Message, SearchFilters } from '../types';
 import { MOCK_LISTINGS, MOCK_CHATS, MOCK_MESSAGES, CURRENT_USER, MOCK_USERS } from '../data/mock';
 import { generateId } from '../utils/format';
@@ -8,9 +9,24 @@ const CATEGORY_BY_ID: Record<string, (typeof CATEGORIES)[number]> = Object.fromE
   CATEGORIES.map(c => [c.id, c])
 );
 
+const FAVORITES_KEY = 'shitje.favorites';
+const MY_LISTINGS_KEY = 'shitje.myListings';
+const REMOVED_KEY = 'shitje.removedListings';
+const SOLD_KEY = 'shitje.soldListings';
+
 // Lowercase + strip Albanian diacritics (ë→e, ç→c) so "makinë" and "makine" match.
 const normalize = (s: string) =>
   s.toLowerCase().replace(/ë/g, 'e').replace(/ç/g, 'c');
+
+// Canned seller replies for the simulated conversation, so chats feel alive.
+const AUTO_REPLIES = [
+  'Po, ende është në shitje. Jeni të interesuar?',
+  'Mund të takohemi kur të doni, jam fleksibël me orarin.',
+  'Çmimi është pak i diskutueshëm, bëni një ofertë.',
+  'Po, gjendja është pikërisht si në foto.',
+  'Faleminderit për interesimin! Më shkruani kur të vendosni.',
+  'Mund t\'jua tregoj edhe me video-thirrje nëse doni.',
+];
 
 interface AppContextType {
   listings: Listing[];
@@ -21,13 +37,23 @@ interface AppContextType {
   favorites: string[];
   searchQuery: string;
   filters: SearchFilters;
-  addListing: (listing: Omit<Listing, 'id' | 'createdAt' | 'views' | 'sellerId' | 'sellerName'>) => void;
+  /** Chats where the other person is "typing" a simulated reply. */
+  typingChats: Record<string, boolean>;
+  addListing: (listing: Omit<Listing, 'id' | 'createdAt' | 'views' | 'sellerId' | 'sellerName'>) => string;
+  deleteListing: (listingId: string) => void;
+  toggleSold: (listingId: string) => void;
   toggleFavorite: (listingId: string) => void;
   setSearchQuery: (query: string) => void;
   setFilters: (filters: SearchFilters) => void;
   sendMessage: (chatId: string, text: string) => void;
+  markChatRead: (chatId: string) => void;
+  /** Find (or create) the chat for a listing and return its id. */
+  getOrCreateChat: (listing: Listing) => string;
+  /** Count a view for a listing — at most once per session. */
+  registerView: (listingId: string) => void;
   getFilteredListings: () => Listing[];
   getListingsByCategory: (categoryId: string) => Listing[];
+  getSimilarListings: (listing: Listing, limit?: number) => Listing[];
   getUserById: (userId: string) => User | undefined;
 }
 
@@ -42,6 +68,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>(CURRENT_USER.favorites);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({ sortBy: 'newest' });
+  const [typingChats, setTypingChats] = useState<Record<string, boolean>>({});
+  const viewedThisSession = useRef<Set<string>>(new Set());
+  const replyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // ---- Persistence: restore favourites + the user's own listings on launch ----
+  useEffect(() => {
+    (async () => {
+      try {
+        const [fav, mine, removed, sold] = await Promise.all([
+          AsyncStorage.getItem(FAVORITES_KEY),
+          AsyncStorage.getItem(MY_LISTINGS_KEY),
+          AsyncStorage.getItem(REMOVED_KEY),
+          AsyncStorage.getItem(SOLD_KEY),
+        ]);
+        if (fav) setFavorites(JSON.parse(fav));
+        const removedIds: string[] = removed ? JSON.parse(removed) : [];
+        const soldIds: string[] = sold ? JSON.parse(sold) : [];
+        const myListings: Listing[] = mine ? JSON.parse(mine) : [];
+        setListings(prev => {
+          const base = prev.filter(l => !removedIds.includes(l.id));
+          const merged = [...myListings.filter(m => !base.some(b => b.id === m.id)), ...base];
+          return soldIds.length
+            ? merged.map(l => (soldIds.includes(l.id) ? { ...l, isSold: true } : l))
+            : merged;
+        });
+      } catch {}
+    })();
+    return () => {
+      replyTimers.current.forEach(clearTimeout);
+    };
+  }, []);
+
+  const persistMine = (all: Listing[]) => {
+    AsyncStorage.setItem(
+      MY_LISTINGS_KEY,
+      JSON.stringify(all.filter(l => l.sellerId === CURRENT_USER.id && !MOCK_LISTINGS.some(m => m.id === l.id)))
+    ).catch(() => {});
+    AsyncStorage.setItem(
+      SOLD_KEY,
+      JSON.stringify(all.filter(l => l.isSold).map(l => l.id))
+    ).catch(() => {});
+  };
 
   const addListing = useCallback((listing: Omit<Listing, 'id' | 'createdAt' | 'views' | 'sellerId' | 'sellerName'>) => {
     const newListing: Listing = {
@@ -52,15 +120,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
       sellerId: currentUser.id,
       sellerName: currentUser.name,
     };
-    setListings(prev => [newListing, ...prev]);
+    setListings(prev => {
+      const next = [newListing, ...prev];
+      persistMine(next);
+      return next;
+    });
+    return newListing.id;
   }, [currentUser]);
 
+  const deleteListing = useCallback((listingId: string) => {
+    setListings(prev => {
+      const next = prev.filter(l => l.id !== listingId);
+      persistMine(next);
+      return next;
+    });
+    if (MOCK_LISTINGS.some(m => m.id === listingId)) {
+      AsyncStorage.getItem(REMOVED_KEY)
+        .then(v => {
+          const removed: string[] = v ? JSON.parse(v) : [];
+          if (!removed.includes(listingId)) {
+            removed.push(listingId);
+            return AsyncStorage.setItem(REMOVED_KEY, JSON.stringify(removed));
+          }
+        })
+        .catch(() => {});
+    }
+    setFavorites(prev => {
+      const next = prev.filter(id => id !== listingId);
+      AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, []);
+
+  const toggleSold = useCallback((listingId: string) => {
+    setListings(prev => {
+      const next = prev.map(l => (l.id === listingId ? { ...l, isSold: !l.isSold } : l));
+      persistMine(next);
+      return next;
+    });
+  }, []);
+
   const toggleFavorite = useCallback((listingId: string) => {
-    setFavorites(prev =>
-      prev.includes(listingId)
+    setFavorites(prev => {
+      const next = prev.includes(listingId)
         ? prev.filter(id => id !== listingId)
-        : [...prev, listingId]
-    );
+        : [...prev, listingId];
+      AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
   }, []);
 
   const sendMessage = useCallback((chatId: string, text: string) => {
@@ -83,10 +190,87 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : chat
       )
     );
+
+    // Simulate the other side: typing for a moment, then a reply.
+    const typingDelay = 900 + Math.random() * 800;
+    const replyDelay = typingDelay + 1200 + Math.random() * 1500;
+    const t1 = setTimeout(() => {
+      setTypingChats(prev => ({ ...prev, [chatId]: true }));
+    }, typingDelay);
+    const t2 = setTimeout(() => {
+      setTypingChats(prev => ({ ...prev, [chatId]: false }));
+      const replyText = AUTO_REPLIES[Math.floor(Math.random() * AUTO_REPLIES.length)];
+      setChats(prevChats => {
+        const chat = prevChats.find(c => c.id === chatId);
+        if (!chat) return prevChats;
+        const otherId = chat.participants.find(p => p !== currentUser.id);
+        if (!otherId) return prevChats;
+        const reply: Message = {
+          id: generateId(),
+          chatId,
+          senderId: otherId,
+          text: replyText,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+        setMessages(prevMsgs => ({
+          ...prevMsgs,
+          [chatId]: [...(prevMsgs[chatId] || []), reply],
+        }));
+        return prevChats.map(c =>
+          c.id === chatId
+            ? { ...c, lastMessage: replyText, lastMessageTime: reply.timestamp }
+            : c
+        );
+      });
+    }, replyDelay);
+    replyTimers.current.push(t1, t2);
   }, [currentUser.id]);
 
+  const markChatRead = useCallback((chatId: string) => {
+    setChats(prev =>
+      prev.map(c => (c.id === chatId && c.unreadCount > 0 ? { ...c, unreadCount: 0 } : c))
+    );
+    setMessages(prev => {
+      const msgs = prev[chatId];
+      if (!msgs || msgs.every(m => m.read)) return prev;
+      return { ...prev, [chatId]: msgs.map(m => ({ ...m, read: true })) };
+    });
+  }, []);
+
+  const getOrCreateChat = useCallback((listing: Listing) => {
+    const existing = chats.find(
+      c => c.listingId === listing.id &&
+        c.participants.includes(currentUser.id) &&
+        c.participants.includes(listing.sellerId)
+    );
+    if (existing) return existing.id;
+
+    const newChat: Chat = {
+      id: generateId(),
+      listingId: listing.id,
+      listingTitle: listing.title,
+      listingImage: listing.images[0],
+      participants: [currentUser.id, listing.sellerId],
+      lastMessage: '',
+      lastMessageTime: new Date().toISOString(),
+      unreadCount: 0,
+    };
+    setChats(prev => [newChat, ...prev]);
+    setMessages(prev => ({ ...prev, [newChat.id]: [] }));
+    return newChat.id;
+  }, [chats, currentUser.id]);
+
+  const registerView = useCallback((listingId: string) => {
+    if (viewedThisSession.current.has(listingId)) return;
+    viewedThisSession.current.add(listingId);
+    setListings(prev =>
+      prev.map(l => (l.id === listingId ? { ...l, views: l.views + 1 } : l))
+    );
+  }, []);
+
   const getFilteredListings = useCallback(() => {
-    let result = [...listings];
+    let result = listings.filter(l => !l.isSold);
 
     if (searchQuery.trim()) {
       const qTokens = normalize(searchQuery.trim()).split(/\s+/).filter(Boolean);
@@ -145,8 +329,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [listings, searchQuery, filters]);
 
   const getListingsByCategory = useCallback((categoryId: string) => {
-    return listings.filter(l => l.category === categoryId)
+    return listings.filter(l => l.category === categoryId && !l.isSold)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [listings]);
+
+  const getSimilarListings = useCallback((listing: Listing, limit = 6) => {
+    return listings
+      .filter(l => l.id !== listing.id && !l.isSold && l.category === listing.category)
+      .sort((a, b) => {
+        // Same subcategory first, then same city, then most viewed.
+        const subA = a.subcategory === listing.subcategory ? 1 : 0;
+        const subB = b.subcategory === listing.subcategory ? 1 : 0;
+        if (subA !== subB) return subB - subA;
+        const locA = a.location === listing.location ? 1 : 0;
+        const locB = b.location === listing.location ? 1 : 0;
+        if (locA !== locB) return locB - locA;
+        return b.views - a.views;
+      })
+      .slice(0, limit);
   }, [listings]);
 
   const getUserById = useCallback((userId: string) => {
@@ -156,9 +356,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       listings, currentUser, users, chats, messages, favorites,
-      searchQuery, filters,
-      addListing, toggleFavorite, setSearchQuery, setFilters,
-      sendMessage, getFilteredListings, getListingsByCategory, getUserById,
+      searchQuery, filters, typingChats,
+      addListing, deleteListing, toggleSold, toggleFavorite,
+      setSearchQuery, setFilters,
+      sendMessage, markChatRead, getOrCreateChat, registerView,
+      getFilteredListings, getListingsByCategory, getSimilarListings, getUserById,
     }}>
       {children}
     </AppContext.Provider>

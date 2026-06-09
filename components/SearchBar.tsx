@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, TextInput, StyleSheet, Pressable } from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Text } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Palette } from '../constants/colors';
 import { useColors } from '../context/ThemeContext';
@@ -9,10 +9,15 @@ interface Props {
   onChangeText: (text: string) => void;
   placeholder?: string;
   onFilterPress?: () => void;
+  /** Number of active filters — shown as a small badge on the filter button. */
+  filterCount?: number;
+  onSubmitEditing?: () => void;
   autoFocus?: boolean;
 }
 
-export default function SearchBar({ value, onChangeText, placeholder, onFilterPress, autoFocus }: Props) {
+export default function SearchBar({
+  value, onChangeText, placeholder, onFilterPress, filterCount = 0, onSubmitEditing, autoFocus,
+}: Props) {
   const Colors = useColors();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
@@ -28,9 +33,10 @@ export default function SearchBar({ value, onChangeText, placeholder, onFilterPr
           placeholderTextColor={Colors.gray[400]}
           autoFocus={autoFocus}
           returnKeyType="search"
+          onSubmitEditing={onSubmitEditing}
         />
         {value.length > 0 && (
-          <Pressable onPress={() => onChangeText('')}>
+          <Pressable onPress={() => onChangeText('')} hitSlop={8}>
             <Feather name="x" size={18} color={Colors.gray[400]} />
           </Pressable>
         )}
@@ -38,6 +44,11 @@ export default function SearchBar({ value, onChangeText, placeholder, onFilterPr
       {onFilterPress && (
         <Pressable style={styles.filterButton} onPress={onFilterPress}>
           <Feather name="sliders" size={18} color={Colors.white} />
+          {filterCount > 0 && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{filterCount}</Text>
+            </View>
+          )}
         </Pressable>
       )}
     </View>
@@ -76,5 +87,24 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.accent,
+    borderRadius: 9,
+    minWidth: 17,
+    height: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: Colors.surface,
+  },
+  filterBadgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
   },
 });

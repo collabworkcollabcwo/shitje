@@ -10,7 +10,7 @@ import { formatDate, truncate } from '../../utils/format';
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { chats, currentUser, getUserById } = useApp();
+  const { chats, currentUser, getUserById, typingChats } = useApp();
   const Colors = useColors();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
@@ -48,12 +48,16 @@ export default function MessagesScreen() {
                 <Text style={styles.listingRef} numberOfLines={1}>
                   {item.listingTitle}
                 </Text>
-                <Text
-                  style={[styles.chatMessage, item.unreadCount > 0 && styles.chatMessageUnread]}
-                  numberOfLines={1}
-                >
-                  {truncate(item.lastMessage, 50)}
-                </Text>
+                {typingChats[item.id] ? (
+                  <Text style={styles.typingText} numberOfLines={1}>po shkruan...</Text>
+                ) : (
+                  <Text
+                    style={[styles.chatMessage, item.unreadCount > 0 && styles.chatMessageUnread]}
+                    numberOfLines={1}
+                  >
+                    {item.lastMessage ? truncate(item.lastMessage, 50) : 'Bisedë e re — thuaj përshëndetje!'}
+                  </Text>
+                )}
               </View>
               {item.unreadCount > 0 && (
                 <View style={styles.unreadBadge}>
@@ -129,6 +133,12 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   chatMessageUnread: {
     color: Colors.secondary,
+    fontWeight: '600',
+  },
+  typingText: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontStyle: 'italic',
     fontWeight: '600',
   },
   unreadBadge: {

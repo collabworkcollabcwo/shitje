@@ -5,7 +5,7 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
-import { formatDate } from '../../utils/format';
+import { formatDate, formatMonthYear } from '../../utils/format';
 import { MOCK_REVIEWS } from '../../data/mock';
 import ListingCard from '../../components/ListingCard';
 
@@ -52,7 +52,7 @@ export default function UserProfileScreen() {
           <View>
             <View style={styles.header}>
               <View style={styles.avatar}>
-                <Feather name="user" size={36} color={Colors.white} />
+                <Text style={styles.avatarInitial}>{user.name.charAt(0).toUpperCase()}</Text>
               </View>
               <Text style={styles.name}>{user.name}</Text>
               <View style={styles.locationRow}>
@@ -75,7 +75,7 @@ export default function UserProfileScreen() {
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.stat}>
-                  <Text style={styles.statValue}>{formatDate(user.joinedAt)}</Text>
+                  <Text style={styles.statValue}>{formatMonthYear(user.joinedAt)}</Text>
                   <Text style={styles.statLabel}>Anëtar që nga</Text>
                 </View>
               </View>
@@ -157,6 +157,7 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  avatarInitial: { fontSize: 32, fontWeight: '700', color: Colors.white },
   name: { fontSize: 22, fontWeight: '700', color: Colors.secondary },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   location: { fontSize: 14, color: Colors.gray[500] },

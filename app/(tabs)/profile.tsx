@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
-import { formatDate } from '../../utils/format';
+import { formatMonthYear } from '../../utils/format';
 import { notify, confirmAction } from '../../utils/notify';
 import ListingCard from '../../components/ListingCard';
 
@@ -42,6 +42,7 @@ export default function ProfileScreen() {
           <View style={styles.locationRow}>
             <Feather name="map-pin" size={13} color={Colors.gray[500]} />
             <Text style={styles.location}>{currentUser.location}</Text>
+            <Text style={styles.memberSince}>· Anëtar që nga {formatMonthYear(currentUser.joinedAt)}</Text>
           </View>
           <View style={styles.statsRow}>
             <View style={styles.stat}>
@@ -92,6 +93,17 @@ export default function ProfileScreen() {
             </View>
           )}
         </View>
+
+        {favoriteListings.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Të preferuarat</Text>
+            <View style={styles.grid}>
+              {favoriteListings.map(l => (
+                <ListingCard key={l.id} listing={l} />
+              ))}
+            </View>
+          </View>
+        )}
 
         <View style={styles.menu}>
           {menuItems.map((item, index) => (
@@ -148,6 +160,10 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   location: {
     fontSize: 14,
     color: Colors.gray[500],
+  },
+  memberSince: {
+    fontSize: 13,
+    color: Colors.gray[400],
   },
   statsRow: {
     flexDirection: 'row',
