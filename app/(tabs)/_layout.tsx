@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
@@ -42,7 +42,9 @@ export default function TabLayout() {
         options={{
           title: 'Kryefaqja',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Feather name="home" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -50,7 +52,9 @@ export default function TabLayout() {
         options={{
           title: 'Kërko',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Feather name="search" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'search' : 'search-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -71,9 +75,9 @@ export default function TabLayout() {
         options={{
           title: 'Mesazhe',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <View>
-              <Feather name="message-circle" size={size} color={color} />
+              <Ionicons name={focused ? 'chatbubble' : 'chatbubble-outline'} size={size} color={color} />
               {unreadCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -88,7 +92,9 @@ export default function TabLayout() {
         options={{
           title: 'Profili',
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Feather name="user" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

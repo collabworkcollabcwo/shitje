@@ -170,7 +170,14 @@ export default function ListingDetailScreen() {
               <Text style={styles.sellerInitial}>{listing.sellerName.charAt(0).toUpperCase()}</Text>
             </View>
             <View style={styles.sellerInfo}>
-              <Text style={styles.sellerName}>{listing.sellerName}</Text>
+              <View style={styles.sellerNameRow}>
+                <Text style={styles.sellerName}>{listing.sellerName}</Text>
+                {seller && seller.rating >= 4.5 && (
+                  <View style={styles.verifiedBadge}>
+                    <Feather name="check" size={9} color={Colors.white} />
+                  </View>
+                )}
+              </View>
               {seller && (
                 <View style={styles.sellerMeta}>
                   <View style={styles.ratingRow}>
@@ -379,10 +386,23 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   sellerInfo: {
     flex: 1,
   },
+  sellerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   sellerName: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.secondary,
+  },
+  verifiedBadge: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: Colors.info,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sellerMeta: {
     flexDirection: 'row',

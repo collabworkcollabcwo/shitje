@@ -82,11 +82,28 @@ export default function HomeScreen() {
           placeholder="Çfarë po kërkon sot?"
         />
 
+        <Pressable style={styles.hero} onPress={() => router.push('/(tabs)/sell')}>
+          <View style={styles.heroCircleBig} />
+          <View style={styles.heroCircleSmall} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroTitle}>Shit gjithçka.{'\n'}Shpejt & falas.</Text>
+            <Text style={styles.heroSubtitle}>Publiko shpalljen tënde në 30 sekonda</Text>
+          </View>
+          <View style={styles.heroCta}>
+            <Feather name="plus" size={16} color={Colors.primary} />
+            <Text style={styles.heroCtaText}>Shit tani</Text>
+          </View>
+        </Pressable>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Kategoritë</Text>
           <HScroll contentContainerStyle={styles.categoriesRow}>
             {CATEGORIES.map(cat => (
-              <CategoryCard key={cat.id} category={cat} />
+              <CategoryCard
+                key={cat.id}
+                category={cat}
+                count={active.filter(l => l.category === cat.id).length}
+              />
             ))}
           </HScroll>
         </View>
@@ -315,6 +332,72 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     backgroundColor: Colors.accent,
     borderWidth: 1.5,
     borderColor: Colors.surface,
+  },
+  hero: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginHorizontal: 12,
+    marginTop: 10,
+    padding: 18,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    overflow: 'hidden',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  heroCircleBig: {
+    position: 'absolute',
+    top: -55,
+    right: -35,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  heroCircleSmall: {
+    position: 'absolute',
+    bottom: -40,
+    right: 70,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  heroTitle: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
+    lineHeight: 24,
+  },
+  heroSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 5,
+  },
+  heroCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  heroCtaText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Colors.primary,
   },
   section: {
     marginTop: 20,

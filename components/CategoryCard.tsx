@@ -8,9 +8,11 @@ import { useColors } from '../context/ThemeContext';
 
 interface Props {
   category: Category;
+  /** Number of active listings — shown as a tiny label under the name. */
+  count?: number;
 }
 
-export default function CategoryCard({ category }: Props) {
+export default function CategoryCard({ category, count }: Props) {
   const router = useRouter();
   const Colors = useColors();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
@@ -24,6 +26,9 @@ export default function CategoryCard({ category }: Props) {
         <MaterialCommunityIcons name={category.icon as any} size={28} color="#FFFFFF" />
       </View>
       <Text style={styles.name} numberOfLines={1}>{category.name}</Text>
+      {count !== undefined && count > 0 && (
+        <Text style={styles.count}>{count} shpallje</Text>
+      )}
     </Pressable>
   );
 }
@@ -57,5 +62,11 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     textAlign: 'center',
     fontWeight: '700',
     letterSpacing: -0.1,
+  },
+  count: {
+    fontSize: 10,
+    color: Colors.gray[400],
+    fontWeight: '600',
+    marginTop: 1,
   },
 });
