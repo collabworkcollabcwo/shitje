@@ -326,7 +326,7 @@ export default function SearchScreen() {
 const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   header: { paddingHorizontal: 16, paddingTop: 12, backgroundColor: Colors.surface },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.secondary },
+  title: { fontSize: 26, fontWeight: '800', color: Colors.secondary, letterSpacing: -0.8 },
   sortRow: { paddingVertical: 4 },
   sortScroll: { paddingHorizontal: 12, gap: 8 },
   sortChip: {
@@ -473,9 +473,14 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   applyButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 15,
     alignItems: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  applyText: { color: Colors.white, fontSize: 16, fontWeight: '700' },
+  applyText: { color: Colors.white, fontSize: 16, fontWeight: '800' },
 });

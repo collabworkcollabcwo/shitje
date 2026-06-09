@@ -34,8 +34,10 @@ export default function ProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Feather name="user" size={36} color={Colors.white} />
+            <View style={styles.avatarRing}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarInitial}>{currentUser.name.charAt(0).toUpperCase()}</Text>
+              </View>
             </View>
           </View>
           <Text style={styles.name}>{currentUser.name}</Text>
@@ -138,6 +140,12 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   avatarContainer: {
     marginBottom: 12,
   },
+  avatarRing: {
+    padding: 4,
+    borderRadius: 50,
+    borderWidth: 2.5,
+    borderColor: Colors.primary,
+  },
   avatar: {
     width: 80,
     height: 80,
@@ -145,11 +153,22 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  avatarInitial: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: Colors.white,
   },
   name: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
     color: Colors.secondary,
+    letterSpacing: -0.5,
   },
   locationRow: {
     flexDirection: 'row',
@@ -169,7 +188,14 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
-    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    backgroundColor: Colors.gray[50],
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.gray[100],
+    alignSelf: 'stretch',
   },
   stat: {
     flex: 1,
@@ -199,9 +225,10 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     paddingHorizontal: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: Colors.secondary,
+    letterSpacing: -0.5,
     marginBottom: 12,
   },
   grid: {
@@ -237,9 +264,14 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   menu: {
     marginTop: 20,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 18,
     marginHorizontal: 16,
     overflow: 'hidden',
+    shadowColor: Colors.gray[900],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
   },
   menuItem: {
     flexDirection: 'row',

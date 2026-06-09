@@ -42,12 +42,14 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.logo}>Shitje</Text>
+          <Text style={styles.logo}>
+            Shitje<Text style={styles.logoDot}>.</Text>
+          </Text>
           <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
         </View>
         <View style={styles.headerActions}>
           <Pressable style={styles.cartButton} onPress={() => router.push('/cart')} hitSlop={8}>
-            <Feather name="shopping-bag" size={22} color={Colors.secondary} />
+            <Feather name="shopping-bag" size={18} color={Colors.secondary} />
             {favorites.length > 0 && (
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeText}>{favorites.length}</Text>
@@ -58,13 +60,13 @@ export default function HomeScreen() {
             <Text style={styles.currencyChipText}>{currency}</Text>
           </Pressable>
           <Pressable style={styles.iconButton} onPress={toggleTheme} hitSlop={8}>
-            <Feather name={isDark ? 'sun' : 'moon'} size={22} color={Colors.secondary} />
+            <Feather name={isDark ? 'sun' : 'moon'} size={18} color={Colors.secondary} />
           </Pressable>
           <Pressable
             style={styles.notifButton}
             onPress={() => notify('Njoftime', 'S’ke njoftime të reja për momentin.')}
           >
-            <Feather name="bell" size={22} color={Colors.secondary} />
+            <Feather name="bell" size={18} color={Colors.secondary} />
             <View style={styles.notifDot} />
           </Pressable>
         </View>
@@ -173,43 +175,60 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 10,
+    paddingBottom: 10,
     backgroundColor: Colors.surface,
   },
   logo: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 30,
+    fontWeight: '900',
+    color: Colors.secondary,
+    letterSpacing: -1.2,
+  },
+  logoDot: {
     color: Colors.primary,
-    letterSpacing: -0.5,
   },
   tagline: {
     fontSize: 12,
+    fontWeight: '500',
     color: Colors.gray[500],
-    marginTop: -2,
+    marginTop: -1,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   iconButton: {
-    padding: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.gray[100],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cartButton: {
     position: 'relative',
-    padding: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.gray[100],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cartBadge: {
     position: 'absolute',
-    top: 2,
-    right: 2,
+    top: -3,
+    right: -3,
     backgroundColor: Colors.accent,
     borderRadius: 9,
-    minWidth: 16,
-    height: 16,
+    minWidth: 17,
+    height: 17,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: Colors.surface,
   },
   cartBadgeText: {
     color: Colors.white,
@@ -217,17 +236,18 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     fontWeight: '700',
   },
   currencyChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.gray[300],
-    marginRight: 2,
+    height: 38,
+    paddingHorizontal: 13,
+    borderRadius: 19,
+    backgroundColor: Colors.gray[100],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   currencyChipText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 12.5,
+    fontWeight: '800',
     color: Colors.secondary,
+    letterSpacing: 0.2,
   },
   modalOverlay: {
     flex: 1,
@@ -278,16 +298,23 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   notifButton: {
     position: 'relative',
-    padding: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.gray[100],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   notifDot: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    right: 9,
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: Colors.accent,
+    borderWidth: 1.5,
+    borderColor: Colors.surface,
   },
   section: {
     marginTop: 20,
@@ -300,16 +327,17 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: Colors.secondary,
+    letterSpacing: -0.5,
     paddingHorizontal: 16,
     marginBottom: 12,
   },
   seeAll: {
     fontSize: 14,
     color: Colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   categoriesRow: {
     paddingHorizontal: 12,

@@ -87,7 +87,7 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: Colors.surface,
   },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.secondary },
+  title: { fontSize: 26, fontWeight: '800', color: Colors.secondary, letterSpacing: -0.8 },
   list: { paddingTop: 8 },
   chatCard: {
     flexDirection: 'row',
@@ -99,9 +99,9 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     borderBottomColor: Colors.gray[100],
   },
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
+    width: 54,
+    height: 54,
+    borderRadius: 16,
     marginRight: 12,
     backgroundColor: Colors.gray[200],
   },

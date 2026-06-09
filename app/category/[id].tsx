@@ -68,9 +68,9 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     borderBottomColor: Colors.gray[200],
   },
   iconBg: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: 68,
+    height: 68,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -80,9 +80,10 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     elevation: 6,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
     color: Colors.secondary,
+    letterSpacing: -0.5,
   },
   count: {
     fontSize: 13,

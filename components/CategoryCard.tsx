@@ -31,30 +31,31 @@ export default function CategoryCard({ category }: Props) {
 const createStyles = (Colors: Palette) => StyleSheet.create({
   card: {
     alignItems: 'center',
-    width: 82,
+    width: 84,
     marginRight: 8,
   },
   cardPressed: {
     opacity: 0.85,
-    transform: [{ scale: 0.96 }],
+    transform: [{ scale: 0.94 }],
   },
   iconContainer: {
-    width: 62,
-    height: 62,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 9,
     // soft coloured glow (converted to box-shadow on web)
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 7,
   },
   name: {
     fontSize: 11.5,
     color: Colors.gray[700],
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: -0.1,
   },
 });
