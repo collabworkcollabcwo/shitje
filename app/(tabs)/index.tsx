@@ -13,13 +13,14 @@ import ListingCard from '../../components/ListingCard';
 import CategoryCard from '../../components/CategoryCard';
 import SearchBar from '../../components/SearchBar';
 import HScroll from '../../components/HScroll';
-import { notify } from '../../utils/notify';
+import { useNotifications } from '../../context/NotificationsContext';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { listings, searchQuery, setSearchQuery, favorites } = useApp();
   const { colors: Colors, isDark, toggleTheme } = useTheme();
   const { currency, setCurrency } = useCurrency();
+  const { unreadCount } = useNotifications();
   const [showCurrency, setShowCurrency] = useState(false);
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
@@ -64,10 +65,15 @@ export default function HomeScreen() {
           </Pressable>
           <Pressable
             style={styles.notifButton}
-            onPress={() => notify('Njoftime', 'S’ke njoftime të reja për momentin.')}
+            onPress={() => router.push('/notifications')}
+            hitSlop={8}
           >
             <Feather name="bell" size={18} color={Colors.secondary} />
-            <View style={styles.notifDot} />
+            {unreadCount > 0 && (
+              <View style={styles.notifBadge}>
+                <Text style={styles.notifBadgeText}>{unreadCount}</Text>
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
@@ -322,16 +328,24 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  notifDot: {
+  notifBadge: {
     position: 'absolute',
-    top: 8,
-    right: 9,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: -3,
+    right: -3,
     backgroundColor: Colors.accent,
+    borderRadius: 9,
+    minWidth: 17,
+    height: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
     borderWidth: 1.5,
     borderColor: Colors.surface,
+  },
+  notifBadgeText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
   },
   hero: {
     flexDirection: 'row',

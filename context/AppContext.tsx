@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Listing, User, Chat, Message, SearchFilters } from '../types';
 import { MOCK_LISTINGS, MOCK_CHATS, MOCK_MESSAGES, CURRENT_USER, MOCK_USERS } from '../data/mock';
 import { generateId } from '../utils/format';
 import { CATEGORIES } from '../constants/categories';
+import { useAuth } from './AuthContext';
 
 const CATEGORY_BY_ID: Record<string, (typeof CATEGORIES)[number]> = Object.fromEntries(
   CATEGORIES.map(c => [c.id, c])
@@ -60,9 +61,32 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const { user: authUser } = useAuth();
   const [listings, setListings] = useState<Listing[]>(MOCK_LISTINGS);
-  const [currentUser] = useState<User>(CURRENT_USER);
-  const [users] = useState<User[]>(MOCK_USERS);
+  // The signed-in account acts as the app's current user; the mock "Flori"
+  // account remains the guest identity for demo data (chats, etc.).
+  const currentUser: User = useMemo(
+    () =>
+      authUser
+        ? {
+            id: authUser.id,
+            name: authUser.name,
+            email: authUser.email,
+            avatar: authUser.avatar,
+            location: 'Shqipëri',
+            joinedAt: authUser.joinedAt,
+            rating: 5,
+            reviewCount: 0,
+            listings: [],
+            favorites: [],
+          }
+        : CURRENT_USER,
+    [authUser]
+  );
+  const users = useMemo(
+    () => (authUser ? [currentUser, ...MOCK_USERS] : MOCK_USERS),
+    [authUser, currentUser]
+  );
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
   const [messages, setMessages] = useState<Record<string, Message[]>>(MOCK_MESSAGES);
   const [favorites, setFavorites] = useState<string[]>(CURRENT_USER.favorites);
@@ -101,9 +125,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persistMine = (all: Listing[]) => {
+    // Persist every user-created listing (anything that isn't seeded mock data),
+    // regardless of which signed-in account published it.
     AsyncStorage.setItem(
       MY_LISTINGS_KEY,
-      JSON.stringify(all.filter(l => l.sellerId === CURRENT_USER.id && !MOCK_LISTINGS.some(m => m.id === l.id)))
+      JSON.stringify(all.filter(l => !MOCK_LISTINGS.some(m => m.id === l.id)))
     ).catch(() => {});
     AsyncStorage.setItem(
       SOLD_KEY,

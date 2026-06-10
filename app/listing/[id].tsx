@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Linking, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Linking, Share, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Palette } from '../../constants/colors';
@@ -47,9 +47,24 @@ export default function ListingDetailScreen() {
   const similar = getSimilarListings(listing, 6);
 
   const handleShare = async () => {
-    await Share.share({
-      message: `${listing.title} - ${format(listing.price)} në Shitje\nhttps://shitje.al/listing/${listing.id}`,
-    });
+    const text = `${listing.title} - ${format(listing.price)} në Shitje`;
+    try {
+      if (Platform.OS === 'web') {
+        // RN-Web's Share is a no-op; use the browser's share sheet, or copy the link.
+        const nav: any = (globalThis as any).navigator;
+        const url = (globalThis as any).location?.href || `https://shitje.al/listing/${listing.id}`;
+        if (nav?.share) {
+          await nav.share({ title: listing.title, text, url });
+        } else if (nav?.clipboard?.writeText) {
+          await nav.clipboard.writeText(url);
+          notify('U kopjua ✓', 'Linku i shpalljes u kopjua. Ngjite kudo për ta ndarë.');
+        }
+      } else {
+        await Share.share({ message: `${text}\nhttps://shitje.al/listing/${listing.id}` });
+      }
+    } catch {
+      // user dismissed the share sheet — nothing to do
+    }
   };
 
   const handleCall = () => {

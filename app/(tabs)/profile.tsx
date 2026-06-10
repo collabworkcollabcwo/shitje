@@ -1,32 +1,47 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Palette } from '../../constants/colors';
 import { useColors } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatMonthYear } from '../../utils/format';
-import { notify, confirmAction } from '../../utils/notify';
+import { confirmAction } from '../../utils/notify';
 import ListingCard from '../../components/ListingCard';
+import AuthPanel from '../../components/AuthPanel';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { currentUser, listings, favorites } = useApp();
-  const myListings = listings.filter(l => l.sellerId === currentUser.id);
-  const favoriteListings = listings.filter(l => favorites.includes(l.id));
+  const { user: authUser, logout } = useAuth();
   const Colors = useColors();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
+  // Not signed in → the profile tab IS the login screen.
+  if (!authUser) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <AuthPanel />
+      </SafeAreaView>
+    );
+  }
+
+  const myListings = listings.filter(l => l.sellerId === currentUser.id);
+  const favoriteListings = listings.filter(l => favorites.includes(l.id));
+  const soldCount = myListings.filter(l => l.isSold).length;
+
   const menuItems = [
-    { icon: 'settings', label: 'Cilësimet', onPress: () => notify('Cilësimet', 'Së shpejti.') },
-    { icon: 'shield', label: 'Privatësia & Siguria', onPress: () => notify('Privatësia & Siguria', 'Së shpejti.') },
-    { icon: 'help-circle', label: 'Ndihmë', onPress: () => notify('Ndihmë', 'Na kontakto në support@shitje.al') },
-    { icon: 'info', label: 'Rreth Shitje', onPress: () => notify('Rreth Shitje', 'Shitje v1.0.0\nTregu i Shqipërisë.') },
+    { icon: 'settings', color: '#5C6BC0', label: 'Cilësimet', onPress: () => router.push('/settings') },
+    { icon: 'bell', color: '#FF6B00', label: 'Njoftimet', onPress: () => router.push('/notifications') },
+    { icon: 'shield', color: '#4CAF50', label: 'Privatësia & Siguria', onPress: () => router.push('/docs?section=siguria') },
+    { icon: 'help-circle', color: '#2196F3', label: 'Ndihmë & Dokumentacion', onPress: () => router.push('/docs') },
+    { icon: 'info', color: '#9B59B6', label: 'Rreth Shitje', onPress: () => router.push('/docs?section=rreth') },
   ];
 
   const handleLogout = () => {
-    confirmAction('Dil nga llogaria', 'A je i sigurt që do të dalësh?', () => {}, 'Dil');
+    confirmAction('Dil nga llogaria', 'A je i sigurt që do të dalësh?', () => logout(), 'Dil');
   };
 
   return (
@@ -35,36 +50,31 @@ export default function ProfileScreen() {
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatarRing}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarInitial}>{currentUser.name.charAt(0).toUpperCase()}</Text>
-              </View>
+              {authUser.avatar ? (
+                <Image source={{ uri: authUser.avatar }} style={styles.avatarImg} />
+              ) : (
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarInitial}>{authUser.name.charAt(0).toUpperCase()}</Text>
+                </View>
+              )}
             </View>
           </View>
-          <Text style={styles.name}>{currentUser.name}</Text>
-          <View style={styles.locationRow}>
-            <Feather name="map-pin" size={13} color={Colors.gray[500]} />
-            <Text style={styles.location}>{currentUser.location}</Text>
-            <Text style={styles.memberSince}>· Anëtar që nga {formatMonthYear(currentUser.joinedAt)}</Text>
+          <Text style={styles.name}>{authUser.name}</Text>
+          <View style={styles.emailRow}>
+            <Feather name={authUser.provider === 'google' ? 'chrome' : 'mail'} size={12} color={Colors.gray[500]} />
+            <Text style={styles.email}>{authUser.email}</Text>
           </View>
+          <Text style={styles.memberSince}>Anëtar që nga {formatMonthYear(authUser.joinedAt)}</Text>
+
           <View style={styles.statsRow}>
-            <View style={styles.stat}>
-              <Text style={styles.statValue}>{currentUser.rating}</Text>
-              <View style={styles.starRow}>
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Feather
-                    key={i}
-                    name="star"
-                    size={12}
-                    color={i <= Math.floor(currentUser.rating) ? Colors.warning : Colors.gray[300]}
-                  />
-                ))}
-              </View>
-              <Text style={styles.statLabel}>{currentUser.reviewCount} vlerësime</Text>
-            </View>
-            <View style={styles.statDivider} />
             <View style={styles.stat}>
               <Text style={styles.statValue}>{myListings.length}</Text>
               <Text style={styles.statLabel}>Shpallje</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.stat}>
+              <Text style={styles.statValue}>{soldCount}</Text>
+              <Text style={styles.statLabel}>Të shitura</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.stat}>
@@ -84,13 +94,14 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>Nuk keni shpallje ende</Text>
+              <Feather name="package" size={32} color={Colors.gray[300]} />
+              <Text style={styles.emptyText}>Nuk ke shpallje ende</Text>
               <Pressable
                 style={styles.sellButton}
                 onPress={() => router.push('/(tabs)/sell')}
               >
                 <Feather name="plus" size={16} color={Colors.white} />
-                <Text style={styles.sellButtonText}>Krijo shpallje</Text>
+                <Text style={styles.sellButtonText}>Krijo shpalljen e parë</Text>
               </Pressable>
             </View>
           )}
@@ -109,8 +120,14 @@ export default function ProfileScreen() {
 
         <View style={styles.menu}>
           {menuItems.map((item, index) => (
-            <Pressable key={index} style={styles.menuItem} onPress={item.onPress}>
-              <Feather name={item.icon as any} size={20} color={Colors.gray[600]} />
+            <Pressable
+              key={index}
+              style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]}
+              onPress={item.onPress}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: item.color + '1E' }]}>
+                <Feather name={item.icon as any} size={16} color={item.color} />
+              </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
               <Feather name="chevron-right" size={18} color={Colors.gray[400]} />
             </Pressable>
@@ -122,7 +139,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Dil nga llogaria</Text>
         </Pressable>
 
-        <Text style={styles.version}>Shitje v1.0.0</Text>
+        <Text style={styles.version}>Shitje v1.1.0</Text>
         <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>
@@ -159,6 +176,11 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
+  avatarImg: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   avatarInitial: {
     fontSize: 34,
     fontWeight: '800',
@@ -170,19 +192,20 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     color: Colors.secondary,
     letterSpacing: -0.5,
   },
-  locationRow: {
+  emailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     marginTop: 4,
   },
-  location: {
-    fontSize: 14,
+  email: {
+    fontSize: 13.5,
     color: Colors.gray[500],
   },
   memberSince: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: Colors.gray[400],
+    marginTop: 3,
   },
   statsRow: {
     flexDirection: 'row',
@@ -206,14 +229,10 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     fontWeight: '700',
     color: Colors.secondary,
   },
-  starRow: {
-    flexDirection: 'row',
-    gap: 1,
-    marginVertical: 2,
-  },
   statLabel: {
     fontSize: 12,
     color: Colors.gray[500],
+    marginTop: 2,
   },
   statDivider: {
     width: 1,
@@ -238,27 +257,33 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   },
   emptySection: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 26,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
+    gap: 8,
   },
   emptyText: {
     fontSize: 14,
     color: Colors.gray[500],
-    marginBottom: 12,
+    marginBottom: 6,
   },
   sellButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: Colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 22,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
   },
   sellButtonText: {
     color: Colors.white,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 14,
   },
   menu: {
@@ -266,6 +291,7 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: 18,
     marginHorizontal: 16,
+    paddingHorizontal: 14,
     overflow: 'hidden',
     shadowColor: Colors.gray[900],
     shadowOffset: { width: 0, height: 4 },
@@ -276,15 +302,24 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 13,
     gap: 12,
+  },
+  menuItemBorder: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.gray[100],
+  },
+  menuIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   menuLabel: {
     flex: 1,
     fontSize: 15,
+    fontWeight: '600',
     color: Colors.gray[700],
   },
   logoutButton: {
@@ -295,13 +330,13 @@ const createStyles = (Colors: Palette) => StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
+    backgroundColor: Colors.accent + '12',
+    borderRadius: 14,
   },
   logoutText: {
     fontSize: 15,
     color: Colors.accent,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   version: {
     textAlign: 'center',

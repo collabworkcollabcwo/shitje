@@ -9,6 +9,7 @@ import { useColors } from '../../context/ThemeContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { CATEGORIES, ALBANIAN_CITIES, CONDITION_LABELS } from '../../constants/categories';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/format';
 import HScroll from '../../components/HScroll';
 import { notify } from '../../utils/notify';
@@ -18,6 +19,7 @@ type FieldErrors = Partial<Record<'title' | 'price' | 'category' | 'condition' |
 export default function SellScreen() {
   const router = useRouter();
   const { addListing } = useApp();
+  const { user: authUser } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -33,6 +35,31 @@ export default function SellScreen() {
 
   const clearError = (field: keyof FieldErrors) =>
     setErrors(prev => (prev[field] ? { ...prev, [field]: undefined } : prev));
+
+  // Publishing requires an account — guests get a friendly gate instead of the form.
+  if (!authUser) {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <View style={styles.gate}>
+          <View style={styles.gateIcon}>
+            <Feather name="lock" size={30} color={Colors.primary} />
+          </View>
+          <Text style={styles.gateTitle}>Hyr për të shitur</Text>
+          <Text style={styles.gateText}>
+            Krijo një llogari falas (ose hyr me Google) për të publikuar shpalljen tënde —
+            zgjat më pak se një minutë.
+          </Text>
+          <Pressable style={styles.gateButton} onPress={() => router.push('/auth')}>
+            <Feather name="log-in" size={17} color="#FFFFFF" />
+            <Text style={styles.gateButtonText}>Hyr ose Regjistrohu</Text>
+          </Pressable>
+          <Pressable style={styles.gateDocs} onPress={() => router.push('/docs?section=shit')} hitSlop={6}>
+            <Text style={styles.gateDocsText}>Si funksionon shitja?</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -252,6 +279,60 @@ export default function SellScreen() {
 
 const createStyles = (Colors: Palette) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
+  gate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 36,
+    gap: 6,
+  },
+  gateIcon: {
+    width: 76,
+    height: 76,
+    borderRadius: 26,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  gateTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: Colors.secondary,
+    letterSpacing: -0.5,
+  },
+  gateText: {
+    fontSize: 14,
+    color: Colors.gray[500],
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  gateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 26,
+    paddingVertical: 14,
+    borderRadius: 26,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  gateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15.5,
+    fontWeight: '800',
+  },
+  gateDocs: { marginTop: 12 },
+  gateDocsText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
   header: {
     paddingHorizontal: 16,
     paddingTop: 12,
