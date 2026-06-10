@@ -6,6 +6,7 @@ import { CurrencyProvider } from '../context/CurrencyContext';
 import { AuthProvider } from '../context/AuthContext';
 import { NotificationsProvider } from '../context/NotificationsContext';
 import PhoneFrame from '../components/PhoneFrame';
+import DialogHost from '../components/AppDialog';
 
 function RootNav() {
   const { colors, isDark } = useTheme();
@@ -40,6 +41,7 @@ function RootNav() {
           <Stack.Screen name="chat/[id]" options={{ title: '' }} />
           <Stack.Screen name="user/[id]" options={{ title: '' }} />
         </Stack>
+        <DialogHost />
       </PhoneFrame>
     </>
   );

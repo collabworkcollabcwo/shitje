@@ -55,9 +55,13 @@ export default function ListingDetailScreen() {
         const url = (globalThis as any).location?.href || `https://shitje.al/listing/${listing.id}`;
         if (nav?.share) {
           await nav.share({ title: listing.title, text, url });
-        } else if (nav?.clipboard?.writeText) {
-          await nav.clipboard.writeText(url);
-          notify('U kopjua ✓', 'Linku i shpalljes u kopjua. Ngjite kudo për ta ndarë.');
+        } else {
+          try {
+            await nav.clipboard.writeText(url);
+            notify('U kopjua ✓', 'Linku i shpalljes u kopjua. Ngjite kudo për ta ndarë.');
+          } catch {
+            notify('Ndaje këtë link', url);
+          }
         }
       } else {
         await Share.share({ message: `${text}\nhttps://shitje.al/listing/${listing.id}` });

@@ -34,7 +34,7 @@ const SEED: Omit<AppNotification, 'read'>[] = [
     title: 'Mirë se erdhe në Shitje! 🎉',
     body: 'Krijo një llogari falas dhe publiko shpalljen tënde të parë në 30 sekonda.',
     createdAt: hoursAgo(1),
-    route: '/auth',
+    route: '/docs?section=llogaria',
   },
   {
     id: 'n_messages',
