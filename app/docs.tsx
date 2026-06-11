@@ -109,6 +109,26 @@ const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: 'cloud',
+    icon: 'cloud',
+    color: '#00BCD4',
+    title: 'Shpallje të përbashkëta (Cloud)',
+    paragraphs: [
+      'Si parazgjedhje, shpalljet ruhen vetëm në pajisjen tënde — përdoruesit e tjerë nuk i shohin. Për t\'i bërë të përbashkëta për të gjithë, lidhe aplikacionin me një bazë të dhënash falas Supabase (5 minuta):',
+    ],
+    bullets: [
+      '1. Hap supabase.com → "New project" (falas, pa kartë).',
+      '2. Te "SQL Editor" ekzekuto: create table public.listings (id text primary key, data jsonb not null, created_at timestamptz default now());',
+      '3. Pastaj: alter table public.listings enable row level security;',
+      '4. Dhe 4 politikat: create policy "anon_select" on public.listings for select to anon using (true); — përsërite për insert (with check (true)), update dhe delete.',
+      '5. Te "Storage" krijo një bucket publik me emrin: listings — dhe shto politikën: create policy "anon_upload" on storage.objects for insert to anon with check (bucket_id = \'listings\');',
+      '6. Te "Settings → API" kopjo "Project URL" dhe "anon public" key.',
+      '7. Në GitHub: repo → Settings → Secrets and variables → Actions → Variables → shto SUPABASE_URL dhe SUPABASE_ANON_KEY.',
+      '8. Bëj një push (ose rinis deploy-in) — nga ai moment çdo shpallje e re publikohet për të gjithë, bashkë me fotot.',
+      'Shënim: politikat e mësipërme janë të hapura (kushdo mund të shkruajë) — të mjaftueshme për demo; për prodhim lidhe me autentikim real.',
+    ],
+  },
+  {
     id: 'zhvilluesit',
     icon: 'code',
     color: '#795548',

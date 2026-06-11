@@ -32,6 +32,10 @@ jobs:
           # Optional: set a GOOGLE_CLIENT_ID repo variable to enable real
           # Google sign-in (see in-app Dokumentacioni → "Për zhvilluesit").
           EXPO_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          # Optional: Supabase project (repo variables) to make listings shared
+          # across all users (Dokumentacioni → "Shpallje të përbashkëta").
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
       # SPA fallback for deep links / refresh, and disable Jekyll.
       - name: Add SPA fallback + .nojekyll
         run: |

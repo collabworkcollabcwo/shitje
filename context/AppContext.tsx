@@ -5,6 +5,7 @@ import { MOCK_LISTINGS, MOCK_CHATS, MOCK_MESSAGES, CURRENT_USER, MOCK_USERS } fr
 import { generateId } from '../utils/format';
 import { CATEGORIES } from '../constants/categories';
 import { useAuth } from './AuthContext';
+import { cloudEnabled, fetchCloudListings, upsertCloudListing, deleteCloudListing, uploadCloudImage } from '../utils/cloud';
 
 const CATEGORY_BY_ID: Record<string, (typeof CATEGORIES)[number]> = Object.fromEntries(
   CATEGORIES.map(c => [c.id, c])
@@ -95,6 +96,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [typingChats, setTypingChats] = useState<Record<string, boolean>>({});
   const viewedThisSession = useRef<Set<string>>(new Set());
   const replyTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Always-fresh user for callbacks with empty dep lists, and the set of ids
+  // that came from the shared cloud (other people's listings — never persisted
+  // into this device's MY_LISTINGS cache).
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
+  const cloudIdsRef = useRef<Set<string>>(new Set());
 
   // ---- Persistence: restore favourites + the user's own listings on launch ----
   useEffect(() => {
@@ -117,6 +124,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ? merged.map(l => (soldIds.includes(l.id) ? { ...l, isSold: true } : l))
             : merged;
         });
+
+        // Shared backend configured → pull everyone's listings and merge them in.
+        // Cloud versions win for user-created ids (e.g. sold on another device).
+        if (cloudEnabled()) {
+          try {
+            const cloud = await fetchCloudListings();
+            cloud.forEach(c => cloudIdsRef.current.add(c.id));
+            setListings(prev => {
+              const cloudById = new Map(cloud.map(c => [c.id, c]));
+              const refreshed = prev.map(p =>
+                cloudById.has(p.id) && !MOCK_LISTINGS.some(m => m.id === p.id)
+                  ? (cloudById.get(p.id) as Listing)
+                  : p
+              );
+              const incoming = cloud.filter(
+                c => !prev.some(p => p.id === c.id) && !removedIds.includes(c.id)
+              );
+              return [...incoming, ...refreshed];
+            });
+          } catch {
+            // offline or backend down — keep the local view
+          }
+        }
       } catch {}
     })();
     return () => {
@@ -125,11 +155,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persistMine = (all: Listing[]) => {
-    // Persist every user-created listing (anything that isn't seeded mock data),
-    // regardless of which signed-in account published it.
+    // Cache user-created listings on the device — but not other people's
+    // cloud listings (those re-arrive from the backend on every launch).
     AsyncStorage.setItem(
       MY_LISTINGS_KEY,
-      JSON.stringify(all.filter(l => !MOCK_LISTINGS.some(m => m.id === l.id)))
+      JSON.stringify(all.filter(l =>
+        !MOCK_LISTINGS.some(m => m.id === l.id) &&
+        (!cloudIdsRef.current.has(l.id) || l.sellerId === currentUserRef.current.id)
+      ))
     ).catch(() => {});
     AsyncStorage.setItem(
       SOLD_KEY,
@@ -151,6 +184,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
       persistMine(next);
       return next;
     });
+
+    // Shared backend: upload the photos (local blob:/file: URIs only exist on
+    // this device), then publish the document so every user sees the listing.
+    if (cloudEnabled()) {
+      (async () => {
+        const uploaded: string[] = [];
+        for (let i = 0; i < newListing.images.length; i++) {
+          const uri = newListing.images[i];
+          if (/^https?:/i.test(uri)) {
+            uploaded.push(uri);
+            continue;
+          }
+          const url = await uploadCloudImage(uri, `${newListing.id}_${i}.jpg`);
+          if (url) uploaded.push(url);
+        }
+        const cloudImages = uploaded.length
+          ? uploaded
+          : [`https://picsum.photos/seed/${newListing.id}/600/600`];
+        const cloudDoc: Listing = { ...newListing, images: cloudImages };
+        if (uploaded.length) {
+          // Swap in the permanent URLs locally too.
+          setListings(prev => {
+            const next = prev.map(l => (l.id === newListing.id ? cloudDoc : l));
+            persistMine(next);
+            return next;
+          });
+        }
+        await upsertCloudListing(cloudDoc);
+      })().catch(() => {});
+    }
     return newListing.id;
   }, [currentUser]);
 
@@ -160,6 +223,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       persistMine(next);
       return next;
     });
+    if (!MOCK_LISTINGS.some(m => m.id === listingId)) {
+      deleteCloudListing(listingId).catch(() => {});
+    }
     if (MOCK_LISTINGS.some(m => m.id === listingId)) {
       AsyncStorage.getItem(REMOVED_KEY)
         .then(v => {
@@ -182,6 +248,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setListings(prev => {
       const next = prev.map(l => (l.id === listingId ? { ...l, isSold: !l.isSold } : l));
       persistMine(next);
+      const updated = next.find(l => l.id === listingId);
+      if (updated && !MOCK_LISTINGS.some(m => m.id === listingId)) {
+        upsertCloudListing(updated).catch(() => {});
+      }
       return next;
     });
   }, []);
