@@ -36,6 +36,10 @@ jobs:
           # across all users (Dokumentacioni → "Shpallje të përbashkëta").
           EXPO_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+      # PWA wiring (manifest, theme colour, iOS icon) — before the 404 copy so
+      # the SPA fallback inherits it.
+      - name: Inject PWA meta
+        run: node scripts/postbuild-web.js
       # SPA fallback for deep links / refresh, and disable Jekyll.
       - name: Add SPA fallback + .nojekyll
         run: |

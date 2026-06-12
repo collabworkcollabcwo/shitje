@@ -152,7 +152,7 @@ const SECTIONS: DocSection[] = [
     title: 'Kontakt',
     paragraphs: [
       'Për çdo pyetje, problem teknik apo raportim: support@shitje.al',
-      'Versioni: Shitje v1.1.0 · Tregu i Shqipërisë 🇦🇱',
+      'Versioni: Shitje v1.2.0 · Tregu i Shqipërisë 🇦🇱',
     ],
   },
 ];

@@ -139,7 +139,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Dil nga llogaria</Text>
         </Pressable>
 
-        <Text style={styles.version}>Shitje v1.1.0</Text>
+        <Text style={styles.version}>Shitje v1.2.0</Text>
         <View style={{ height: 30 }} />
       </ScrollView>
     </SafeAreaView>

@@ -130,7 +130,7 @@ export default function SettingsScreen() {
         </Pressable>
       )}
 
-      <Text style={styles.version}>Shitje v1.1.0 · Bërë me ❤️ për Shqipërinë</Text>
+      <Text style={styles.version}>Shitje v1.2.0 · Bërë me ❤️ për Shqipërinë</Text>
     </ScrollView>
   );
 }
