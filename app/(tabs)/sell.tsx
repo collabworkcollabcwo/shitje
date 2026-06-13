@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image, Switch, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Image, Switch, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/format';
 import HScroll from '../../components/HScroll';
 import { notify } from '../../utils/notify';
+import { toPersistentImage } from '../../utils/image';
 
 type FieldErrors = Partial<Record<'title' | 'price' | 'category' | 'condition' | 'location', string>>;
 
@@ -61,6 +62,8 @@ export default function SellScreen() {
     );
   }
 
+  const [processing, setProcessing] = useState(false);
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -70,7 +73,12 @@ export default function SellScreen() {
     });
 
     if (!result.canceled) {
-      setImages(prev => [...prev, ...result.assets.map(a => a.uri)].slice(0, 8));
+      setProcessing(true);
+      // Convert to persistent (data) URIs so the photos survive reload and
+      // show after publishing — even before a database is configured.
+      const converted = await Promise.all(result.assets.map(a => toPersistentImage(a.uri)));
+      setImages(prev => [...prev, ...converted].slice(0, 8));
+      setProcessing(false);
     }
   };
 
@@ -136,10 +144,16 @@ export default function SellScreen() {
         <ScrollView style={styles.form} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <Text style={styles.label}>Fotot</Text>
           <HScroll style={styles.imageRow}>
-            <Pressable style={styles.addImageButton} onPress={pickImage}>
-              <Feather name="camera" size={28} color={Colors.primary} />
-              <Text style={styles.addImageText}>Shto foto</Text>
-              <Text style={styles.imageCount}>{images.length}/8</Text>
+            <Pressable style={styles.addImageButton} onPress={pickImage} disabled={processing}>
+              {processing ? (
+                <ActivityIndicator color={Colors.primary} />
+              ) : (
+                <>
+                  <Feather name="camera" size={28} color={Colors.primary} />
+                  <Text style={styles.addImageText}>Shto foto</Text>
+                  <Text style={styles.imageCount}>{images.length}/8</Text>
+                </>
+              )}
             </Pressable>
             {images.map((uri, index) => (
               <View key={index} style={styles.imagePreview}>

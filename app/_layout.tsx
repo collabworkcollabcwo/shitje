@@ -5,6 +5,7 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { CurrencyProvider } from '../context/CurrencyContext';
 import { AuthProvider } from '../context/AuthContext';
 import { NotificationsProvider } from '../context/NotificationsContext';
+import { ReviewsProvider } from '../context/ReviewsContext';
 import PhoneFrame from '../components/PhoneFrame';
 import DialogHost from '../components/AppDialog';
 
@@ -53,9 +54,11 @@ export default function RootLayout() {
       <CurrencyProvider>
         <AuthProvider>
           <NotificationsProvider>
-            <AppProvider>
-              <RootNav />
-            </AppProvider>
+            <ReviewsProvider>
+              <AppProvider>
+                <RootNav />
+              </AppProvider>
+            </ReviewsProvider>
           </NotificationsProvider>
         </AuthProvider>
       </CurrencyProvider>

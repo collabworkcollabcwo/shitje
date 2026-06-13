@@ -125,6 +125,7 @@ const SECTIONS: DocSection[] = [
       '6. Te "Settings → API" kopjo "Project URL" dhe "anon public" key.',
       '7. Në GitHub: repo → Settings → Secrets and variables → Actions → Variables → shto SUPABASE_URL dhe SUPABASE_ANON_KEY.',
       '8. Bëj një push (ose rinis deploy-in) — nga ai moment çdo shpallje e re publikohet për të gjithë, bashkë me fotot.',
+      'Fotot: pa bazë të dhënash, fotot e shpalljeve ruhen drejtpërdrejt në pajisjen tënde (të kompresuara) dhe shfaqen normalisht për ty. Sapo të lidhësh Supabase-in (bucket-in "listings"), fotot ngarkohen automatikisht dhe i sheh çdokush.',
       'Shënim: politikat e mësipërme janë të hapura (kushdo mund të shkruajë) — të mjaftueshme për demo; për prodhim lidhe me autentikim real.',
     ],
   },
